@@ -2,48 +2,89 @@
 <html lang="ko">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>카드뉴스 메이커</title>
   <style>
     * { box-sizing: border-box; }
     body {
-      margin: 0; padding: 20px; color: #f4f4f5;
-      background: #101116; font: 15px Arial, sans-serif;
+      margin: 0;
+      padding: 20px;
+      color: #f4f4f5;
+      background: #101116;
+      font: 15px Arial, sans-serif;
     }
     h1 { max-width: 1200px; margin: 0 auto 16px; font-size: 22px; }
     .layout {
-      display: grid; grid-template-columns: 330px minmax(280px,1fr) 300px;
-      gap: 16px; max-width: 1200px; margin: auto;
+      display: grid;
+      grid-template-columns: minmax(260px, 330px) minmax(300px, 1fr) minmax(260px, 300px);
+      gap: 16px;
+      max-width: 1200px;
+      margin: 0 auto;
+      align-items: start;
     }
     .panel, .preview {
-      background: #181a22; border: 1px solid #292c36; border-radius: 12px; padding: 16px;
+      padding: 16px;
+      border: 1px solid #292c36;
+      border-radius: 12px;
+      background: #181a22;
     }
-    label { display: block; margin: 13px 0 6px; color: #d5d6dc; font-size: 13px; font-weight: bold; }
+    label {
+      display: block;
+      margin: 13px 0 6px;
+      color: #d5d6dc;
+      font-size: 13px;
+      font-weight: bold;
+    }
     input, select, textarea, button {
-      width: 100%; padding: 10px; color: #f4f4f5; background: #111319;
-      border: 1px solid #343743; border-radius: 7px; font: inherit;
+      width: 100%;
+      padding: 10px;
+      color: #f4f4f5;
+      background: #111319;
+      border: 1px solid #343743;
+      border-radius: 7px;
+      font: inherit;
     }
-    textarea { min-height: 76px; resize: vertical; }
+    textarea { min-height: 86px; resize: vertical; line-height: 1.5; }
+    input[type="color"] { height: 42px; padding: 4px; }
+    input[type="range"] { padding: 0; accent-color: #6847ff; }
     input[type="file"] { padding: 8px; }
-    input[type="color"] { height: 40px; padding: 3px; }
-    input[type="range"] { padding: 0; }
     button {
-      margin-top: 10px; border: 0; background: #6544f5;
-      font-weight: bold; cursor: pointer;
+      border: 0;
+      background: #6745f5;
+      font-weight: bold;
+      cursor: pointer;
     }
-    button:hover { background: #785eff; }
-    button:disabled { opacity: .55; cursor: wait; }
-    .secondary { background: #292c36; }
-    .hint { color: #a6a8b2; font-size: 12px; line-height: 1.5; }
-    #status { min-height: 22px; color: #b9aaff; font-size: 13px; }
-    .preview { display: flex; flex-direction: column; align-items: center; }
+    button:hover { background: #785bff; }
+    button.secondary { background: #292c36; }
+    button:disabled { opacity: .5; cursor: default; }
+    small, .help, #status { color: #a9abb6; line-height: 1.5; }
+    .help { margin: 8px 0; font-size: 12px; }
+    #status { min-height: 24px; margin: 8px 0; font-size: 13px; }
+    .canvas-wrap {
+      width: 100%;
+      max-width: 300px;
+      margin: 0 auto;
+      overflow: hidden;
+      border-radius: 9px;
+      background: #242236;
+    }
     canvas {
-      width: min(100%, 432px); height: auto; border-radius: 8px;
-      background: #242236; touch-action: none;
+      display: block;
+      width: 100%;
+      height: auto;
+      aspect-ratio: 4 / 5;
+      touch-action: none;
+      cursor: grab;
     }
-    .nav { display: flex; gap: 8px; width: min(100%, 432px); }
-    .nav button { flex: 1; }
-    @media (max-width: 900px) { .layout { grid-template-columns: 1fr; } }
+    canvas:active { cursor: grabbing; }
+    .row { display: flex; gap: 8px; margin-top: 10px; }
+    .row button { flex: 1; }
+    .counter { margin: 8px 0; color: #a9abb6; text-align: center; font-size: 12px; }
+    @media (max-width: 900px) {
+      body { padding: 14px; }
+      .layout { grid-template-columns: 1fr; }
+      .canvas-wrap { max-width: min(100%, 360px); }
+    }
   </style>
 </head>
 <body>
@@ -52,302 +93,320 @@
   <main class="layout">
     <section class="panel">
       <label for="workerUrl">AI 연결 주소</label>
-      <input id="workerUrl" type="url" placeholder="Cloudflare Worker 주소를 나중에 입력">
-      <p class="hint">API 키는 이 화면이나 GitHub 코드에 입력하지 마세요.</p>
+      <input id="workerUrl" type="url" placeholder="Cloudflare Worker 주소를 입력하세요">
+      <p class="help">접속 암호가 포함된 주소예요. 다른 사람과 공유하지 마세요.</p>
 
-      <label for="sourceImage">인스타그램 참고 이미지 (선택)</label>
-      <input id="sourceImage" type="file" accept="image/*">
+      <label for="caption">번역할 캡션 (직접 입력)</label>
+      <textarea id="caption" placeholder="번역할 캡션을 붙여넣으세요."></textarea>
 
-      <label for="caption">캡션 / 본문 텍스트</label>
-      <textarea id="caption" placeholder="번역·카드 제작에 사용할 글을 붙여넣으세요."></textarea>
-
-      <label for="targetLanguage">카드 언어</label>
-      <select id="targetLanguage">
-        <option value="ko">한국어</option>
-        <option value="en">English</option>
-        <option value="ja">日本語</option>
+      <label for="language">제목 언어</label>
+      <select id="language">
+        <option value="한국어">한국어</option>
+        <option value="영어">English</option>
+        <option value="일본어">日本語</option>
       </select>
 
-      <button id="makeCards">분석하고 카드 생성</button>
-      <p id="status" role="status"></p>
-      <p class="hint">참고 이미지와 본문은 AI 분석을 요청할 때 OpenAI API로 전송됩니다. 카드에 쓸 사진은 아래에서 따로 업로드합니다.</p>
+      <label>제목 번역</label>
+      <button id="translateButton">제목 번역</button>
+      <p id="status"></p>
+      <p class="help">입력한 캡션 텍스트만 Gemini로 전송됩니다. 사진은 전송되지 않습니다.</p>
 
-      <label for="cardImage">카드 썸네일 / 배경 사진</label>
-      <input id="cardImage" type="file" accept="image/*">
-      <p class="hint">직접 준비한 사진을 선택하세요. 사진은 카드 미리보기의 배경으로 들어갑니다.</p>
+      <label for="imageFile">카드 사진 (직접 업로드)</label>
+      <input id="imageFile" type="file" accept="image/*">
+      <p class="help">사진은 이 브라우저에서 카드 배경으로 사용됩니다.</p>
+
+      <div class="row">
+        <button id="addCardButton" class="secondary">카드 추가</button>
+        <button id="downloadButton">현재 카드 PNG 다운로드</button>
+      </div>
     </section>
 
     <section class="preview">
-      <canvas id="canvas" width="1080" height="1350"></canvas>
-      <div class="nav">
-        <button id="previousCard" class="secondary">이전 카드</button>
-        <button id="nextCard" class="secondary">다음 카드</button>
+      <div class="canvas-wrap">
+        <canvas id="cardCanvas" width="1080" height="1350"></canvas>
       </div>
-      <p class="hint">1080 × 1350 · 미리보기의 제목이나 본문을 끌어 위치를 조절할 수 있어요.</p>
-      <button id="download">현재 카드 PNG 다운로드</button>
+      <div class="row">
+        <button id="previousButton" class="secondary">이전 카드</button>
+        <button id="nextButton" class="secondary">다음 카드</button>
+      </div>
+      <p class="counter" id="cardCounter"></p>
+      <p class="help">미리보기의 제목이나 본문을 끌어 위치를 조절할 수 있어요.</p>
     </section>
 
     <section class="panel">
-      <label for="cardTitle">제목</label>
-      <textarea id="cardTitle" placeholder="AI 카드 제목 또는 직접 입력"></textarea>
+      <label for="titleInput">제목 (번역 후 직접 수정 가능)</label>
+      <textarea id="titleInput" placeholder="캡션을 번역하면 제목이 여기에 들어옵니다."></textarea>
 
-      <label for="cardBody">본문</label>
-      <textarea id="cardBody" placeholder="AI 카드 본문 또는 직접 입력"></textarea>
+      <label for="bodyInput">본문 (직접 입력)</label>
+      <textarea id="bodyInput" placeholder="카드에 넣을 본문을 직접 입력하세요."></textarea>
 
-      <label for="textPart">편집할 글자</label>
-      <select id="textPart">
+      <label for="activeText">크기 조절할 글자</label>
+      <select id="activeText">
         <option value="title">제목</option>
         <option value="body">본문</option>
       </select>
 
       <label for="fontSize">글자 크기</label>
-      <input id="fontSize" type="range" min="24" max="110" value="64">
+      <input id="fontSize" type="range" min="24" max="120" value="72">
 
       <label for="textColor">글자 색</label>
       <input id="textColor" type="color" value="#ffffff">
 
-      <label for="imageSuggestion">사진 아이디어</label>
-      <textarea id="imageSuggestion" readonly placeholder="카드 내용에 어울리는 사진 아이디어"></textarea>
+      <label for="backgroundColor">배경 색</label>
+      <input id="backgroundColor" type="color" value="#242236">
     </section>
   </main>
 
   <script>
-    const canvas = document.getElementById("canvas");
+    const canvas = document.getElementById("cardCanvas");
     const ctx = canvas.getContext("2d");
-    const statusBox = document.getElementById("status");
     const workerUrlInput = document.getElementById("workerUrl");
+    const captionInput = document.getElementById("caption");
+    const languageInput = document.getElementById("language");
+    const titleInput = document.getElementById("titleInput");
+    const bodyInput = document.getElementById("bodyInput");
+    const activeTextInput = document.getElementById("activeText");
+    const fontSizeInput = document.getElementById("fontSize");
+    const textColorInput = document.getElementById("textColor");
+    const backgroundColorInput = document.getElementById("backgroundColor");
+    const statusText = document.getElementById("status");
 
-    let sourceImageData = "";
-    let cardPhoto = null;
-    let cards = [];
-    let cardIndex = 0;
-    let dragPart = "";
-    let dragStartY = 0;
-
-    workerUrlInput.value = localStorage.getItem("cardWorkerUrl") || "";
-    workerUrlInput.addEventListener("change", () => {
-      localStorage.setItem("cardWorkerUrl", workerUrlInput.value.trim());
+    workerUrlInput.value = localStorage.getItem("cardNewsWorkerUrl") || "";
+    workerUrlInput.addEventListener("input", () => {
+      localStorage.setItem("cardNewsWorkerUrl", workerUrlInput.value.trim());
     });
 
-    function readDataUrl(file) {
-      return new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onload = () => resolve(reader.result);
-        reader.onerror = reject;
-        reader.readAsDataURL(file);
-      });
+    function newCard() {
+      return {
+        title: "",
+        body: "",
+        image: null,
+        titleX: 540,
+        titleY: 790,
+        bodyX: 540,
+        bodyY: 1020,
+        titleSize: 76,
+        bodySize: 46,
+        textColor: "#ffffff",
+        backgroundColor: "#242236"
+      };
     }
 
-    document.getElementById("sourceImage").addEventListener("change", async event => {
-      const file = event.target.files[0];
-      if (!file) return;
-      if (file.size > 8 * 1024 * 1024) {
-        statusBox.textContent = "참고 이미지는 8MB 이하 파일을 선택해 주세요.";
-        return;
+    const cards = [newCard()];
+    let currentCard = 0;
+    let dragging = false;
+    let dragOffsetX = 0;
+    let dragOffsetY = 0;
+
+    function card() { return cards[currentCard]; }
+
+    function loadCard() {
+      titleInput.value = card().title;
+      bodyInput.value = card().body;
+      textColorInput.value = card().textColor;
+      backgroundColorInput.value = card().backgroundColor;
+      fontSizeInput.value = activeTextInput.value === "title"
+        ? card().titleSize
+        : card().bodySize;
+      updateCounter();
+      draw();
+    }
+
+    function saveInputs() {
+      card().title = titleInput.value;
+      card().body = bodyInput.value;
+      card().textColor = textColorInput.value;
+      card().backgroundColor = backgroundColorInput.value;
+      if (activeTextInput.value === "title") {
+        card().titleSize = Number(fontSizeInput.value);
+      } else {
+        card().bodySize = Number(fontSizeInput.value);
       }
-      sourceImageData = await readDataUrl(file);
-      statusBox.textContent = "참고 이미지를 불러왔어요.";
-    });
-
-    document.getElementById("cardImage").addEventListener("change", event => {
-      const file = event.target.files[0];
-      if (!file) return;
-      const image = new Image();
-      image.onload = () => {
-        cardPhoto = image;
-        paint();
-        statusBox.textContent = "카드 배경 사진을 불러왔어요.";
-      };
-      image.src = URL.createObjectURL(file);
-    });
-
-    function currentCard() {
-      return cards[cardIndex] || {
-        title: "제목", body: "캡션을 입력하고 카드를 생성해 보세요.",
-        titleY: 760, bodyY: 930, titleSize: 72, bodySize: 42
-      };
+      draw();
     }
 
-    function wrapText(text, maxWidth, size) {
-      ctx.font = `bold ${size}px Arial, sans-serif`;
+    function wrapText(text, maxWidth, fontSize) {
       const lines = [];
-      for (const paragraph of String(text || "").split("\n")) {
-        let line = "";
-        for (const char of paragraph) {
-          const next = line + char;
-          if (line && ctx.measureText(next).width > maxWidth) {
-            lines.push(line);
-            line = char;
-          } else line = next;
+      let line = "";
+      for (const character of text) {
+        if (character === "\n") {
+          lines.push(line);
+          line = "";
+          continue;
         }
-        lines.push(line);
+        const candidate = line + character;
+        if (line && ctx.measureText(candidate).width > maxWidth) {
+          lines.push(line);
+          line = character;
+        } else {
+          line = candidate;
+        }
       }
-      return lines.length ? lines : [""];
+      if (line) lines.push(line);
+      return lines;
     }
 
-    function drawBlock(text, y, size, color, maxHeight) {
-      let fontSize = size;
-      let lines = wrapText(text, 920, fontSize);
-      while (fontSize > 24 && lines.length * fontSize * 1.2 > maxHeight) {
-        fontSize -= 2;
-        lines = wrapText(text, 920, fontSize);
-      }
-      ctx.font = `bold ${fontSize}px Arial, sans-serif`;
+    function drawText(text, x, y, size, maxLines) {
+      if (!text) return;
+      ctx.font = `bold ${size}px Arial, "Noto Sans KR", sans-serif`;
       ctx.textAlign = "center";
-      ctx.textBaseline = "middle";
-      ctx.lineWidth = Math.max(3, fontSize / 16);
-      ctx.strokeStyle = "rgba(0,0,0,.72)";
-      ctx.fillStyle = color;
-      const lineHeight = fontSize * 1.2;
+      ctx.textBaseline = "top";
+      ctx.fillStyle = card().textColor;
+      ctx.shadowColor = "rgba(0,0,0,.75)";
+      ctx.shadowBlur = 8;
+      const lines = wrapText(text, 920, size).slice(0, maxLines);
+      const lineHeight = size * 1.2;
       lines.forEach((line, index) => {
-        const lineY = y + (index - (lines.length - 1) / 2) * lineHeight;
-        ctx.strokeText(line, canvas.width / 2, lineY);
-        ctx.fillText(line, canvas.width / 2, lineY);
+        ctx.fillText(line, x, y + index * lineHeight);
       });
+      ctx.shadowBlur = 0;
     }
 
-    function paint() {
-      const card = currentCard();
-      ctx.fillStyle = "#252238";
+    function draw() {
+      const c = card();
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.fillStyle = c.backgroundColor;
       ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-      if (cardPhoto) {
-        const scale = Math.max(canvas.width / cardPhoto.width, canvas.height / cardPhoto.height);
-        const w = cardPhoto.width * scale, h = cardPhoto.height * scale;
-        ctx.drawImage(cardPhoto, (canvas.width - w) / 2, (canvas.height - h) / 2, w, h);
+      if (c.image && c.image.complete) {
+        const scale = Math.max(canvas.width / c.image.width, canvas.height / c.image.height);
+        const width = c.image.width * scale;
+        const height = c.image.height * scale;
+        ctx.drawImage(c.image, (canvas.width - width) / 2, (canvas.height - height) / 2, width, height);
+        const gradient = ctx.createLinearGradient(0, 500, 0, 1350);
+        gradient.addColorStop(0, "rgba(0,0,0,0)");
+        gradient.addColorStop(1, "rgba(0,0,0,.78)");
+        ctx.fillStyle = gradient;
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
       }
 
-      const shade = ctx.createLinearGradient(0, 400, 0, 1350);
-      shade.addColorStop(0, "rgba(0,0,0,0)");
-      shade.addColorStop(1, "rgba(0,0,0,.82)");
-      ctx.fillStyle = shade;
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-      drawBlock(card.title, card.titleY, card.titleSize, document.getElementById("textColor").value, 300);
-      drawBlock(card.body, card.bodyY, card.bodySize, document.getElementById("textColor").value, 420);
+      drawText(c.title, c.titleX, c.titleY, c.titleSize, 5);
+      drawText(c.body, c.bodyX, c.bodyY, c.bodySize, 8);
+      document.getElementById("cardCounter").textContent =
+        `카드 ${currentCard + 1} / ${cards.length} · 1080 × 1350`;
     }
 
-    function showCard() {
-      const card = currentCard();
-      document.getElementById("cardTitle").value = card.title || "";
-      document.getElementById("cardBody").value = card.body || "";
-      document.getElementById("fontSize").value =
-        document.getElementById("textPart").value === "title" ? card.titleSize || 72 : card.bodySize || 42;
-      document.getElementById("imageSuggestion").value = card.imageSuggestion || "";
-      paint();
-    }
+    [titleInput, bodyInput, textColorInput, backgroundColorInput, fontSizeInput]
+      .forEach((element) => element.addEventListener("input", saveInputs));
 
-    document.getElementById("makeCards").addEventListener("click", async () => {
-      const url = workerUrlInput.value.trim();
-      const caption = document.getElementById("caption").value.trim();
+    activeTextInput.addEventListener("change", () => {
+      fontSizeInput.value = activeTextInput.value === "title"
+        ? card().titleSize
+        : card().bodySize;
+    });
+
+    document.getElementById("imageFile").addEventListener("change", (event) => {
+      const file = event.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = () => {
+        const image = new Image();
+        image.onload = () => {
+          card().image = image;
+          draw();
+        };
+        image.src = reader.result;
+      };
+      reader.readAsDataURL(file);
+    });
+
+    document.getElementById("translateButton").addEventListener("click", async () => {
+      const workerUrl = workerUrlInput.value.trim();
+      const caption = captionInput.value.trim();
+
+      if (!workerUrl) {
+        statusText.textContent = "먼저 AI 연결 주소를 입력해 주세요.";
+        return;
+      }
       if (!caption) {
-        statusBox.textContent = "먼저 캡션 / 본문 텍스트를 입력해 주세요.";
-        return;
-      }
-      if (!url) {
-        statusBox.textContent = "AI 연결 주소를 설정한 뒤 사용할 수 있어요. 다음 단계에서 연결할게요.";
+        statusText.textContent = "번역할 캡션을 입력해 주세요.";
         return;
       }
 
-      const button = document.getElementById("makeCards");
+      statusText.textContent = "제목을 번역하고 있어요…";
+      const button = document.getElementById("translateButton");
       button.disabled = true;
-      statusBox.textContent = "내용을 분석하고 번역하는 중…";
 
       try {
-        const response = await fetch(url, {
+        const response = await fetch(workerUrl, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             caption,
-            targetLanguage: document.getElementById("targetLanguage").value,
-            referenceImage: sourceImageData
+            targetLanguage: languageInput.value
           })
         });
         const result = await response.json();
-        if (!response.ok) throw new Error(result.error || "요청을 처리하지 못했어요.");
-        if (!Array.isArray(result.cards) || !result.cards.length) throw new Error("카드 내용을 받지 못했어요.");
+        if (!response.ok) throw new Error(result.error || "번역 요청에 실패했습니다.");
 
-        cards = result.cards.map(card => ({
-          title: card.title || "",
-          body: card.body || "",
-          imageSuggestion: card.imageSuggestion || "",
-          titleY: 760, bodyY: 1010, titleSize: 72, bodySize: 42
-        }));
-        cardIndex = 0;
-        showCard();
-        statusBox.textContent = `${cards.length}개 카드 초안을 만들었어요. 문구를 확인하고 수정해 주세요.`;
+        const translatedTitle = result.cards?.[0]?.title || result.title;
+        if (!translatedTitle) throw new Error("번역 결과가 비어 있습니다.");
+
+        titleInput.value = translatedTitle;
+        card().title = translatedTitle;
+        statusText.textContent = "제목 번역이 끝났어요. 제목을 직접 수정할 수도 있어요.";
+        draw();
       } catch (error) {
-        statusBox.textContent = error.message || "연결에 실패했어요. 주소와 인터넷 연결을 확인해 주세요.";
+        statusText.textContent = `번역 오류: ${error.message}`;
       } finally {
         button.disabled = false;
       }
     });
 
-    document.getElementById("cardTitle").addEventListener("input", event => {
-      if (!cards.length) cards = [currentCard()];
-      cards[cardIndex].title = event.target.value;
-      paint();
+    function changeCard(index) {
+      saveInputs();
+      currentCard = Math.max(0, Math.min(cards.length - 1, index));
+      loadCard();
+    }
+
+    document.getElementById("previousButton").addEventListener("click", () => {
+      changeCard(currentCard - 1);
+    });
+    document.getElementById("nextButton").addEventListener("click", () => {
+      changeCard(currentCard + 1);
+    });
+    document.getElementById("addCardButton").addEventListener("click", () => {
+      saveInputs();
+      cards.push(newCard());
+      currentCard = cards.length - 1;
+      loadCard();
     });
 
-    document.getElementById("cardBody").addEventListener("input", event => {
-      if (!cards.length) cards = [currentCard()];
-      cards[cardIndex].body = event.target.value;
-      paint();
-    });
-
-    document.getElementById("textPart").addEventListener("change", showCard);
-
-    document.getElementById("fontSize").addEventListener("input", event => {
-      if (!cards.length) cards = [currentCard()];
-      const key = document.getElementById("textPart").value === "title" ? "titleSize" : "bodySize";
-      cards[cardIndex][key] = Number(event.target.value);
-      paint();
-    });
-
-    document.getElementById("textColor").addEventListener("input", paint);
-
-    document.getElementById("previousCard").addEventListener("click", () => {
-      if (!cards.length) return;
-      cardIndex = (cardIndex - 1 + cards.length) % cards.length;
-      showCard();
-    });
-
-    document.getElementById("nextCard").addEventListener("click", () => {
-      if (!cards.length) return;
-      cardIndex = (cardIndex + 1) % cards.length;
-      showCard();
-    });
-
-    canvas.addEventListener("pointerdown", event => {
+    canvas.addEventListener("pointerdown", (event) => {
       const rect = canvas.getBoundingClientRect();
+      const x = (event.clientX - rect.left) * canvas.width / rect.width;
       const y = (event.clientY - rect.top) * canvas.height / rect.height;
-      const card = currentCard();
-      dragPart = Math.abs(y - card.titleY) < Math.abs(y - card.bodyY) ? "title" : "body";
-      dragStartY = y;
+      const textType = activeTextInput.value;
+      const c = card();
+      dragging = true;
+      dragOffsetX = x - c[`${textType}X`];
+      dragOffsetY = y - c[`${textType}Y`];
       canvas.setPointerCapture(event.pointerId);
     });
 
-    canvas.addEventListener("pointermove", event => {
-      if (!dragPart) return;
+    canvas.addEventListener("pointermove", (event) => {
+      if (!dragging) return;
       const rect = canvas.getBoundingClientRect();
+      const x = (event.clientX - rect.left) * canvas.width / rect.width;
       const y = (event.clientY - rect.top) * canvas.height / rect.height;
-      const card = currentCard();
-      const key = dragPart === "title" ? "titleY" : "bodyY";
-      card[key] = Math.max(100, Math.min(1250, card[key] + y - dragStartY));
-      dragStartY = y;
-      paint();
+      const textType = activeTextInput.value;
+      card()[`${textType}X`] = Math.max(80, Math.min(1000, x - dragOffsetX));
+      card()[`${textType}Y`] = Math.max(40, Math.min(1250, y - dragOffsetY));
+      draw();
     });
 
-    canvas.addEventListener("pointerup", () => { dragPart = ""; });
+    canvas.addEventListener("pointerup", () => { dragging = false; });
+    canvas.addEventListener("pointercancel", () => { dragging = false; });
 
-    document.getElementById("download").addEventListener("click", () => {
+    document.getElementById("downloadButton").addEventListener("click", () => {
+      draw();
       const link = document.createElement("a");
-      link.download = `card-${cardIndex + 1}.png`;
+      link.download = `card-news-${currentCard + 1}.png`;
       link.href = canvas.toDataURL("image/png");
       link.click();
     });
 
-    paint();
+    loadCard();
   </script>
 </body>
 </html>
