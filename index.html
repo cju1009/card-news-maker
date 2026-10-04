@@ -6,50 +6,78 @@
   <title>카드뉴스 만들기</title>
   <style>
     * { box-sizing: border-box; }
-    body {
-      margin: 0; padding: 24px; font-family: Arial, sans-serif;
-      color: #222; background: #f3f4f6;
-    }
-    h1 { margin: 0 0 18px; font-size: 24px; }
-    .layout { display: grid; grid-template-columns: 320px minmax(280px, 1fr); gap: 24px; max-width: 1050px; margin: auto; }
+    body { margin: 0; padding: 24px; font-family: Arial, sans-serif; color: #222; background: #f3f4f6; }
+    h1 { max-width: 1100px; margin: 0 auto 18px; font-size: 24px; }
+    .layout { display: grid; grid-template-columns: 340px minmax(280px, 1fr); gap: 20px; max-width: 1100px; margin: auto; }
     .panel, .stage { padding: 18px; background: white; border-radius: 12px; }
     label { display: block; margin: 14px 0 6px; font-size: 14px; font-weight: bold; }
-    input, button { font: inherit; }
-    input[type="text"], input[type="number"] { width: 100%; padding: 9px; border: 1px solid #ccc; border-radius: 6px; }
-    input[type="color"] { width: 100%; height: 38px; }
-    input[type="file"] { width: 100%; }
-    button { margin-top: 10px; padding: 10px 12px; border: 0; border-radius: 6px; background: #155eef; color: white; cursor: pointer; }
+    input, textarea, select, button { width: 100%; padding: 9px; font: inherit; border: 1px solid #ccc; border-radius: 6px; }
+    textarea { min-height: 80px; resize: vertical; }
+    input[type="color"] { height: 40px; padding: 3px; }
+    button { margin-top: 10px; border: 0; background: #155eef; color: white; cursor: pointer; }
     button:hover { background: #104bbd; }
+    button:disabled { opacity: .55; cursor: wait; }
     .secondary { background: #555; }
+    .hint { color: #666; font-size: 13px; line-height: 1.5; }
     .stage { display: flex; flex-direction: column; align-items: center; }
     canvas { width: min(100%, 432px); height: auto; border: 1px solid #ddd; touch-action: none; }
-    .hint { color: #666; font-size: 13px; line-height: 1.5; }
-    @media (max-width: 700px) { .layout { grid-template-columns: 1fr; } }
+    #status { min-height: 24px; color: #155eef; font-size: 14px; }
+    @media (max-width: 720px) { body { padding: 12px; } .layout { grid-template-columns: 1fr; } }
   </style>
 </head>
 <body>
   <h1>카드뉴스 만들기</h1>
+
   <main class="layout">
     <section class="panel">
       <label for="photo">사진 업로드</label>
       <input id="photo" type="file" accept="image/*">
 
-      <label for="textInput">텍스트</label>
-      <input id="textInput" type="text" placeholder="카드에 넣을 문구">
+      <label for="sourceLang">사진 속 글자 언어</label>
+      <select id="sourceLang">
+        <option value="eng|en">영어</option>
+        <option value="jpn|ja">일본어</option>
+        <option value="kor|ko">한국어</option>
+        <option value="chi_sim|zh-CN">중국어(간체)</option>
+        <option value="spa|es">스페인어</option>
+        <option value="fra|fr">프랑스어</option>
+      </select>
 
-      <label for="fontSize">글자 크기</label>
+      <label for="targetLang">번역할 언어</label>
+      <select id="targetLang">
+        <option value="ko">한국어</option>
+        <option value="en">영어</option>
+        <option value="ja">일본어</option>
+        <option value="es">스페인어</option>
+        <option value="fr">프랑스어</option>
+      </select>
+
+      <button id="readTranslate">사진 글자 읽고 번역</button>
+
+      <label for="recognizedText">인식한 원문</label>
+      <textarea id="recognizedText" placeholder="사진에서 읽은 글자가 여기에 표시돼요."></textarea>
+
+      <label for="textInput">카드에 넣을 문구</label>
+      <textarea id="textInput" placeholder="직접 입력하거나 번역문을 가져오세요."></textarea>
+      <button id="useTranslation" class="secondary">번역문을 카드 문구로 가져오기</button>
+
+      <label for="fontSize">선택한 글자 크기</label>
       <input id="fontSize" type="number" min="12" max="160" value="64">
 
-      <label for="textColor">글자 색</label>
+      <label for="textColor">선택한 글자 색</label>
       <input id="textColor" type="color" value="#ffffff">
 
-      <button id="addText">텍스트 추가</button>
+      <button id="addText">새 텍스트 추가</button>
       <button id="deleteText" class="secondary">선택한 텍스트 삭제</button>
       <button id="download">PNG 다운로드</button>
 
+      <p id="status" role="status"></p>
       <p class="hint">
-        미리보기에서 글자를 눌러 선택하고 드래그하면 위치를 바꿀 수 있어요.
-        선택한 글자의 문구, 크기, 색을 바꾼 뒤 텍스트 추가를 누르면 새 문구가 추가됩니다.
+        미리보기의 글자를 눌러 선택하고 끌면 위치를 바꿀 수 있어요.
+        선택한 글자의 문구, 크기, 색을 왼쪽에서 수정할 수 있습니다.
+      </p>
+      <p class="hint">
+        사진 글자 읽기와 번역에는 인터넷 연결이 필요해요. 인식된 글자는 번역 서비스로 전송됩니다.
       </p>
     </section>
 
@@ -59,17 +87,44 @@
     </section>
   </main>
 
+  <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
   <script>
     const canvas = document.getElementById("canvas");
     const ctx = canvas.getContext("2d");
     const photoInput = document.getElementById("photo");
+    const sourceLang = document.getElementById("sourceLang");
+    const targetLang = document.getElementById("targetLang");
+    const recognizedText = document.getElementById("recognizedText");
     const textInput = document.getElementById("textInput");
     const fontSizeInput = document.getElementById("fontSize");
     const textColorInput = document.getElementById("textColor");
+    const statusBox = document.getElementById("status");
+
     let photo = null;
     let texts = [];
     let selected = -1;
     let dragging = false;
+
+    function wrapLines(text, size) {
+      ctx.font = `bold ${size}px Arial, sans-serif`;
+      const maxWidth = 900;
+      const result = [];
+
+      for (const paragraph of text.split("\n")) {
+        let line = "";
+        for (const character of paragraph) {
+          const next = line + character;
+          if (line && ctx.measureText(next).width > maxWidth) {
+            result.push(line);
+            line = character;
+          } else {
+            line = next;
+          }
+        }
+        result.push(line);
+      }
+      return result.length ? result : [""];
+    }
 
     function draw() {
       ctx.fillStyle = "#eeeeee";
@@ -77,25 +132,35 @@
 
       if (photo) {
         const scale = Math.max(canvas.width / photo.width, canvas.height / photo.height);
-        const w = photo.width * scale, h = photo.height * scale;
-        ctx.drawImage(photo, (canvas.width - w) / 2, (canvas.height - h) / 2, w, h);
+        const width = photo.width * scale;
+        const height = photo.height * scale;
+        ctx.drawImage(photo, (canvas.width - width) / 2, (canvas.height - height) / 2, width, height);
       }
 
       texts.forEach((item, index) => {
+        const lines = wrapLines(item.text, item.size);
+        const lineHeight = item.size * 1.25;
+        const firstY = item.y - ((lines.length - 1) * lineHeight) / 2;
+
         ctx.font = `bold ${item.size}px Arial, sans-serif`;
         ctx.textAlign = "center";
         ctx.textBaseline = "middle";
         ctx.lineWidth = Math.max(3, item.size / 14);
-        ctx.strokeStyle = "rgba(0,0,0,.55)";
+        ctx.strokeStyle = "rgba(0,0,0,.6)";
         ctx.fillStyle = item.color;
-        ctx.strokeText(item.text, item.x, item.y);
-        ctx.fillText(item.text, item.x, item.y);
+
+        lines.forEach((line, lineIndex) => {
+          const y = firstY + lineIndex * lineHeight;
+          ctx.strokeText(line, item.x, y);
+          ctx.fillText(line, item.x, y);
+        });
 
         if (index === selected) {
-          const width = ctx.measureText(item.text).width;
+          const widest = Math.max(...lines.map(line => ctx.measureText(line).width), 40);
+          const boxHeight = lines.length * lineHeight;
           ctx.strokeStyle = "#155eef";
           ctx.lineWidth = 4;
-          ctx.strokeRect(item.x - width / 2 - 10, item.y - item.size / 2 - 8, width + 20, item.size + 16);
+          ctx.strokeRect(item.x - widest / 2 - 12, item.y - boxHeight / 2 - 8, widest + 24, boxHeight + 16);
         }
       });
     }
@@ -104,15 +169,109 @@
       const file = event.target.files[0];
       if (!file) return;
       const image = new Image();
-      image.onload = () => { photo = image; draw(); };
+      image.onload = () => {
+        photo = image;
+        draw();
+        statusBox.textContent = "사진을 불러왔어요.";
+      };
+      image.onerror = () => { statusBox.textContent = "사진을 열지 못했어요. 다른 이미지 파일을 선택해 주세요."; };
       image.src = URL.createObjectURL(file);
     });
 
-    document.getElementById("addText").addEventListener("click", () => {
-      const value = textInput.value.trim();
-      if (!value) { alert("먼저 텍스트를 입력해 주세요."); return; }
+    document.getElementById("readTranslate").addEventListener("click", async () => {
+      if (!photo) {
+        statusBox.textContent = "먼저 사진을 업로드해 주세요.";
+        return;
+      }
+      if (!window.Tesseract) {
+        statusBox.textContent = "글자 읽기 도구를 불러오지 못했어요. 인터넷 연결을 확인해 주세요.";
+        return;
+      }
+
+      const button = document.getElementById("readTranslate");
+      button.disabled = true;
+
+      try {
+        const [ocrCode, sourceCode] = sourceLang.value.split("|");
+        statusBox.textContent = "사진에서 글자를 읽고 있어요. 처음에는 조금 걸릴 수 있어요.";
+
+        const worker = await Tesseract.createWorker(ocrCode, 1, {
+          logger: message => {
+            if (message.status === "recognizing text") {
+              statusBox.textContent = `사진 글자 읽는 중… ${Math.round(message.progress * 100)}%`;
+            }
+          }
+        });
+
+        const result = await worker.recognize(photo);
+        await worker.terminate();
+
+        const original = result.data.text.trim();
+        recognizedText.value = original;
+
+        if (!original) {
+          statusBox.textContent = "글자를 찾지 못했어요. 더 선명한 사진으로 다시 시도해 주세요.";
+          return;
+        }
+
+        statusBox.textContent = "읽은 글자를 번역하고 있어요.";
+        const translated = await translateLongText(original, sourceCode, targetLang.value);
+        textInput.value = translated;
+        if (selected >= 0) {
+          texts[selected].text = translated;
+          draw();
+        }
+        statusBox.textContent = "글자 읽기와 번역이 끝났어요. 번역문을 확인해 주세요.";
+      } catch (error) {
+        statusBox.textContent = "처리 중 문제가 생겼어요. 인터넷 연결을 확인하고 다시 시도해 주세요.";
+      } finally {
+        button.disabled = false;
+      }
+    });
+
+    async function translateLongText(text, from, to) {
+      const chunks = [];
+      let chunk = "";
+
+      for (const character of text) {
+        if (new TextEncoder().encode(chunk + character).length > 400 && chunk) {
+          chunks.push(chunk);
+          chunk = "";
+        }
+        chunk += character;
+      }
+      if (chunk) chunks.push(chunk);
+
+      const translatedChunks = [];
+      for (const part of chunks) {
+        const params = new URLSearchParams({
+          q: part,
+          langpair: `${from}|${to}`
+        });
+        const response = await fetch(`https://api.mymemory.translated.net/get?${params}`);
+        if (!response.ok) throw new Error("Translation request failed");
+        const data = await response.json();
+        translatedChunks.push(data.responseData.translatedText);
+      }
+      return translatedChunks.join("");
+    }
+
+    document.getElementById("useTranslation").addEventListener("click", () => {
+      if (!recognizedText.value.trim()) {
+        statusBox.textContent = "먼저 사진 글자 읽고 번역을 실행해 주세요.";
+        return;
+      }
+      textInput.value = textInput.value.trim();
+      addNewText(textInput.value);
+    });
+
+    function addNewText(value) {
+      if (!value.trim()) {
+        statusBox.textContent = "카드에 넣을 문구를 입력해 주세요.";
+        return;
+      }
       texts.push({
-        text: value,
+        text: value.trim(),
         size: Math.max(12, Number(fontSizeInput.value) || 64),
         color: textColorInput.value,
         x: canvas.width / 2,
@@ -120,13 +279,39 @@
       });
       selected = texts.length - 1;
       draw();
+      statusBox.textContent = "텍스트를 카드에 넣었어요.";
+    }
+
+    document.getElementById("addText").addEventListener("click", () => addNewText(textInput.value));
+
+    textInput.addEventListener("input", () => {
+      if (selected >= 0) {
+        texts[selected].text = textInput.value;
+        draw();
+      }
+    });
+
+    fontSizeInput.addEventListener("input", () => {
+      if (selected >= 0) {
+        texts[selected].size = Math.max(12, Number(fontSizeInput.value) || 64);
+        draw();
+      }
+    });
+
+    textColorInput.addEventListener("input", () => {
+      if (selected >= 0) {
+        texts[selected].color = textColorInput.value;
+        draw();
+      }
     });
 
     document.getElementById("deleteText").addEventListener("click", () => {
       if (selected < 0) return;
       texts.splice(selected, 1);
       selected = -1;
+      textInput.value = "";
       draw();
+      statusBox.textContent = "선택한 텍스트를 삭제했어요.";
     });
 
     function pointerPosition(event) {
@@ -140,18 +325,22 @@
     canvas.addEventListener("pointerdown", event => {
       const point = pointerPosition(event);
       selected = -1;
+
       for (let i = texts.length - 1; i >= 0; i--) {
         const item = texts[i];
-        ctx.font = `bold ${item.size}px Arial, sans-serif`;
-        const width = ctx.measureText(item.text).width;
-        if (Math.abs(point.x - item.x) <= width / 2 + 16 &&
-            Math.abs(point.y - item.y) <= item.size / 2 + 16) {
+        const lines = wrapLines(item.text, item.size);
+        const widest = Math.max(...lines.map(line => ctx.measureText(line).width), 40);
+        const boxHeight = lines.length * item.size * 1.25;
+
+        if (Math.abs(point.x - item.x) <= widest / 2 + 16 &&
+            Math.abs(point.y - item.y) <= boxHeight / 2 + 16) {
           selected = i;
           dragging = true;
           canvas.setPointerCapture(event.pointerId);
           break;
         }
       }
+
       if (selected >= 0) {
         textInput.value = texts[selected].text;
         fontSizeInput.value = texts[selected].size;
@@ -169,6 +358,7 @@
     });
 
     canvas.addEventListener("pointerup", () => { dragging = false; });
+    canvas.addEventListener("pointercancel", () => { dragging = false; });
 
     document.getElementById("download").addEventListener("click", () => {
       const link = document.createElement("a");
