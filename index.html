@@ -1,0 +1,183 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>카드뉴스 만들기</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0; padding: 24px; font-family: Arial, sans-serif;
+      color: #222; background: #f3f4f6;
+    }
+    h1 { margin: 0 0 18px; font-size: 24px; }
+    .layout { display: grid; grid-template-columns: 320px minmax(280px, 1fr); gap: 24px; max-width: 1050px; margin: auto; }
+    .panel, .stage { padding: 18px; background: white; border-radius: 12px; }
+    label { display: block; margin: 14px 0 6px; font-size: 14px; font-weight: bold; }
+    input, button { font: inherit; }
+    input[type="text"], input[type="number"] { width: 100%; padding: 9px; border: 1px solid #ccc; border-radius: 6px; }
+    input[type="color"] { width: 100%; height: 38px; }
+    input[type="file"] { width: 100%; }
+    button { margin-top: 10px; padding: 10px 12px; border: 0; border-radius: 6px; background: #155eef; color: white; cursor: pointer; }
+    button:hover { background: #104bbd; }
+    .secondary { background: #555; }
+    .stage { display: flex; flex-direction: column; align-items: center; }
+    canvas { width: min(100%, 432px); height: auto; border: 1px solid #ddd; touch-action: none; }
+    .hint { color: #666; font-size: 13px; line-height: 1.5; }
+    @media (max-width: 700px) { .layout { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+  <h1>카드뉴스 만들기</h1>
+  <main class="layout">
+    <section class="panel">
+      <label for="photo">사진 업로드</label>
+      <input id="photo" type="file" accept="image/*">
+
+      <label for="textInput">텍스트</label>
+      <input id="textInput" type="text" placeholder="카드에 넣을 문구">
+
+      <label for="fontSize">글자 크기</label>
+      <input id="fontSize" type="number" min="12" max="160" value="64">
+
+      <label for="textColor">글자 색</label>
+      <input id="textColor" type="color" value="#ffffff">
+
+      <button id="addText">텍스트 추가</button>
+      <button id="deleteText" class="secondary">선택한 텍스트 삭제</button>
+      <button id="download">PNG 다운로드</button>
+
+      <p class="hint">
+        미리보기에서 글자를 눌러 선택하고 드래그하면 위치를 바꿀 수 있어요.
+        선택한 글자의 문구, 크기, 색을 바꾼 뒤 텍스트 추가를 누르면 새 문구가 추가됩니다.
+      </p>
+    </section>
+
+    <section class="stage">
+      <canvas id="canvas" width="1080" height="1350"></canvas>
+      <p class="hint">미리보기 크기: 1080 × 1350</p>
+    </section>
+  </main>
+
+  <script>
+    const canvas = document.getElementById("canvas");
+    const ctx = canvas.getContext("2d");
+    const photoInput = document.getElementById("photo");
+    const textInput = document.getElementById("textInput");
+    const fontSizeInput = document.getElementById("fontSize");
+    const textColorInput = document.getElementById("textColor");
+    let photo = null;
+    let texts = [];
+    let selected = -1;
+    let dragging = false;
+
+    function draw() {
+      ctx.fillStyle = "#eeeeee";
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      if (photo) {
+        const scale = Math.max(canvas.width / photo.width, canvas.height / photo.height);
+        const w = photo.width * scale, h = photo.height * scale;
+        ctx.drawImage(photo, (canvas.width - w) / 2, (canvas.height - h) / 2, w, h);
+      }
+
+      texts.forEach((item, index) => {
+        ctx.font = `bold ${item.size}px Arial, sans-serif`;
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        ctx.lineWidth = Math.max(3, item.size / 14);
+        ctx.strokeStyle = "rgba(0,0,0,.55)";
+        ctx.fillStyle = item.color;
+        ctx.strokeText(item.text, item.x, item.y);
+        ctx.fillText(item.text, item.x, item.y);
+
+        if (index === selected) {
+          const width = ctx.measureText(item.text).width;
+          ctx.strokeStyle = "#155eef";
+          ctx.lineWidth = 4;
+          ctx.strokeRect(item.x - width / 2 - 10, item.y - item.size / 2 - 8, width + 20, item.size + 16);
+        }
+      });
+    }
+
+    photoInput.addEventListener("change", event => {
+      const file = event.target.files[0];
+      if (!file) return;
+      const image = new Image();
+      image.onload = () => { photo = image; draw(); };
+      image.src = URL.createObjectURL(file);
+    });
+
+    document.getElementById("addText").addEventListener("click", () => {
+      const value = textInput.value.trim();
+      if (!value) { alert("먼저 텍스트를 입력해 주세요."); return; }
+      texts.push({
+        text: value,
+        size: Math.max(12, Number(fontSizeInput.value) || 64),
+        color: textColorInput.value,
+        x: canvas.width / 2,
+        y: canvas.height / 2
+      });
+      selected = texts.length - 1;
+      draw();
+    });
+
+    document.getElementById("deleteText").addEventListener("click", () => {
+      if (selected < 0) return;
+      texts.splice(selected, 1);
+      selected = -1;
+      draw();
+    });
+
+    function pointerPosition(event) {
+      const rect = canvas.getBoundingClientRect();
+      return {
+        x: (event.clientX - rect.left) * canvas.width / rect.width,
+        y: (event.clientY - rect.top) * canvas.height / rect.height
+      };
+    }
+
+    canvas.addEventListener("pointerdown", event => {
+      const point = pointerPosition(event);
+      selected = -1;
+      for (let i = texts.length - 1; i >= 0; i--) {
+        const item = texts[i];
+        ctx.font = `bold ${item.size}px Arial, sans-serif`;
+        const width = ctx.measureText(item.text).width;
+        if (Math.abs(point.x - item.x) <= width / 2 + 16 &&
+            Math.abs(point.y - item.y) <= item.size / 2 + 16) {
+          selected = i;
+          dragging = true;
+          canvas.setPointerCapture(event.pointerId);
+          break;
+        }
+      }
+      if (selected >= 0) {
+        textInput.value = texts[selected].text;
+        fontSizeInput.value = texts[selected].size;
+        textColorInput.value = texts[selected].color;
+      }
+      draw();
+    });
+
+    canvas.addEventListener("pointermove", event => {
+      if (!dragging || selected < 0) return;
+      const point = pointerPosition(event);
+      texts[selected].x = point.x;
+      texts[selected].y = point.y;
+      draw();
+    });
+
+    canvas.addEventListener("pointerup", () => { dragging = false; });
+
+    document.getElementById("download").addEventListener("click", () => {
+      const link = document.createElement("a");
+      link.download = "card-news.png";
+      link.href = canvas.toDataURL("image/png");
+      link.click();
+    });
+
+    draw();
+  </script>
+</body>
+</html>
