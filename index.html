@@ -1,373 +1,424 @@
 <!doctype html>
 <html lang="ko">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>카드뉴스 만들기</title>
-  <style>
-    * { box-sizing: border-box; }
-    body { margin: 0; padding: 24px; font-family: Arial, sans-serif; color: #222; background: #f3f4f6; }
-    h1 { max-width: 1100px; margin: 0 auto 18px; font-size: 24px; }
-    .layout { display: grid; grid-template-columns: 340px minmax(280px, 1fr); gap: 20px; max-width: 1100px; margin: auto; }
-    .panel, .stage { padding: 18px; background: white; border-radius: 12px; }
-    label { display: block; margin: 14px 0 6px; font-size: 14px; font-weight: bold; }
-    input, textarea, select, button { width: 100%; padding: 9px; font: inherit; border: 1px solid #ccc; border-radius: 6px; }
-    textarea { min-height: 80px; resize: vertical; }
-    input[type="color"] { height: 40px; padding: 3px; }
-    button { margin-top: 10px; border: 0; background: #155eef; color: white; cursor: pointer; }
-    button:hover { background: #104bbd; }
-    button:disabled { opacity: .55; cursor: wait; }
-    .secondary { background: #555; }
-    .hint { color: #666; font-size: 13px; line-height: 1.5; }
-    .stage { display: flex; flex-direction: column; align-items: center; }
-    canvas { width: min(100%, 432px); height: auto; border: 1px solid #ddd; touch-action: none; }
-    #status { min-height: 24px; color: #155eef; font-size: 14px; }
-    @media (max-width: 720px) { body { padding: 12px; } .layout { grid-template-columns: 1fr; } }
-  </style>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>카드뉴스 만들기</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;padding:20px;font-family:Arial,sans-serif;background:#f3f4f6;color:#222}
+h1,.layout{max-width:1100px;margin-left:auto;margin-right:auto}
+h1{font-size:24px}
+.layout{display:grid;grid-template-columns:340px minmax(280px,1fr);gap:20px}
+.panel,.stage{padding:18px;background:white;border-radius:12px}
+label{display:block;margin:13px 0 6px;font-weight:bold;font-size:14px}
+input,select,textarea,button{width:100%;padding:9px;border:1px solid #ccc;border-radius:6px;font:inherit}
+textarea{min-height:70px}
+input[type=color]{height:40px;padding:3px}
+button{margin-top:9px;border:0;background:#155eef;color:white;cursor:pointer}
+button:hover{background:#104bbd}
+.secondary{background:#555}
+.hint{color:#666;font-size:13px;line-height:1.5}
+#status{min-height:22px;color:#155eef;font-size:14px}
+.stage{display:flex;flex-direction:column;align-items:center}
+canvas{width:min(100%,432px);height:auto;border:1px solid #ddd;touch-action:none}
+@media(max-width:720px){.layout{grid-template-columns:1fr}}
+</style>
 </head>
 <body>
-  <h1>카드뉴스 만들기</h1>
+<h1>카드뉴스 만들기</h1>
+<main class="layout">
+  <section class="panel">
+    <label for="photo">사진 업로드</label>
+    <input id="photo" type="file" accept="image/*">
 
-  <main class="layout">
-    <section class="panel">
-      <label for="photo">사진 업로드</label>
-      <input id="photo" type="file" accept="image/*">
+    <label for="sourceLang">사진 속 글자 언어</label>
+    <select id="sourceLang">
+      <option value="eng|en">영어</option>
+      <option value="jpn|ja">일본어</option>
+      <option value="kor|ko">한국어</option>
+      <option value="chi_sim|zh-CN">중국어(간체)</option>
+      <option value="spa|es">스페인어</option>
+      <option value="fra|fr">프랑스어</option>
+    </select>
 
-      <label for="sourceLang">사진 속 글자 언어</label>
-      <select id="sourceLang">
-        <option value="eng|en">영어</option>
-        <option value="jpn|ja">일본어</option>
-        <option value="kor|ko">한국어</option>
-        <option value="chi_sim|zh-CN">중국어(간체)</option>
-        <option value="spa|es">스페인어</option>
-        <option value="fra|fr">프랑스어</option>
-      </select>
+    <label for="targetLang">번역할 언어</label>
+    <select id="targetLang">
+      <option value="ko">한국어</option>
+      <option value="en">영어</option>
+      <option value="ja">일본어</option>
+      <option value="es">스페인어</option>
+      <option value="fr">프랑스어</option>
+    </select>
 
-      <label for="targetLang">번역할 언어</label>
-      <select id="targetLang">
-        <option value="ko">한국어</option>
-        <option value="en">영어</option>
-        <option value="ja">일본어</option>
-        <option value="es">스페인어</option>
-        <option value="fr">프랑스어</option>
-      </select>
+    <button id="selectArea">1. 제목 영역 선택</button>
+    <button id="translateReplace" disabled>2. 선택 영역 번역해 바꾸기</button>
 
-      <button id="readTranslate">사진 글자 읽고 번역</button>
+    <label for="recognizedText">인식한 원문</label>
+    <textarea id="recognizedText" placeholder="선택한 영역에서 읽은 글자"></textarea>
 
-      <label for="recognizedText">인식한 원문</label>
-      <textarea id="recognizedText" placeholder="사진에서 읽은 글자가 여기에 표시돼요."></textarea>
+    <label for="textInput">카드에 표시할 문구</label>
+    <textarea id="textInput" placeholder="번역문 또는 직접 입력"></textarea>
 
-      <label for="textInput">카드에 넣을 문구</label>
-      <textarea id="textInput" placeholder="직접 입력하거나 번역문을 가져오세요."></textarea>
-      <button id="useTranslation" class="secondary">번역문을 카드 문구로 가져오기</button>
+    <label for="fontSize">선택한 글자 크기</label>
+    <input id="fontSize" type="number" min="12" max="160" value="64">
 
-      <label for="fontSize">선택한 글자 크기</label>
-      <input id="fontSize" type="number" min="12" max="160" value="64">
+    <label for="textColor">선택한 글자 색</label>
+    <input id="textColor" type="color" value="#ffffff">
 
-      <label for="textColor">선택한 글자 색</label>
-      <input id="textColor" type="color" value="#ffffff">
+    <button id="addText">새 텍스트 추가</button>
+    <button id="deleteText" class="secondary">선택한 텍스트 삭제</button>
+    <button id="download">PNG 다운로드</button>
 
-      <button id="addText">새 텍스트 추가</button>
-      <button id="deleteText" class="secondary">선택한 텍스트 삭제</button>
-      <button id="download">PNG 다운로드</button>
+    <p id="status" role="status"></p>
+    <p class="hint">먼저 제목 영역 선택을 누르고, 미리보기에서 바꿀 글자 영역을 끌어 선택하세요. 그 영역을 읽어 번역하고 원문 위에 번역문을 표시합니다. 인스타그램 화면 전체가 아니라 제목이 있는 부분만 선택해 주세요.</p>
+    <p class="hint">글자 인식은 브라우저에서 처리하고, 번역을 위해 인식된 글자는 번역 서비스로 전송됩니다.</p>
+  </section>
 
-      <p id="status" role="status"></p>
-      <p class="hint">
-        미리보기의 글자를 눌러 선택하고 끌면 위치를 바꿀 수 있어요.
-        선택한 글자의 문구, 크기, 색을 왼쪽에서 수정할 수 있습니다.
-      </p>
-      <p class="hint">
-        사진 글자 읽기와 번역에는 인터넷 연결이 필요해요. 인식된 글자는 번역 서비스로 전송됩니다.
-      </p>
-    </section>
+  <section class="stage">
+    <canvas id="canvas" width="1080" height="1350"></canvas>
+    <p class="hint">미리보기 크기: 1080 × 1350</p>
+  </section>
+</main>
 
-    <section class="stage">
-      <canvas id="canvas" width="1080" height="1350"></canvas>
-      <p class="hint">미리보기 크기: 1080 × 1350</p>
-    </section>
-  </main>
+<script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
+<script>
+const canvas=document.getElementById("canvas");
+const ctx=canvas.getContext("2d");
+const photoInput=document.getElementById("photo");
+const sourceLang=document.getElementById("sourceLang");
+const targetLang=document.getElementById("targetLang");
+const recognizedText=document.getElementById("recognizedText");
+const textInput=document.getElementById("textInput");
+const fontSizeInput=document.getElementById("fontSize");
+const textColorInput=document.getElementById("textColor");
+const statusBox=document.getElementById("status");
 
-  <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
-  <script>
-    const canvas = document.getElementById("canvas");
-    const ctx = canvas.getContext("2d");
-    const photoInput = document.getElementById("photo");
-    const sourceLang = document.getElementById("sourceLang");
-    const targetLang = document.getElementById("targetLang");
-    const recognizedText = document.getElementById("recognizedText");
-    const textInput = document.getElementById("textInput");
-    const fontSizeInput = document.getElementById("fontSize");
-    const textColorInput = document.getElementById("textColor");
-    const statusBox = document.getElementById("status");
+let photo=null;
+let objects=[];
+let selected=-1;
+let selectionMode=false;
+let drawingSelection=false;
+let dragging=false;
+let selectionStart=null;
+let selectedArea=null;
 
-    let photo = null;
-    let texts = [];
-    let selected = -1;
-    let dragging = false;
+function drawBackground(target){
+  const c=target.getContext("2d");
+  c.fillStyle="#eeeeee";
+  c.fillRect(0,0,target.width,target.height);
+  if(photo){
+    const scale=Math.max(target.width/photo.width,target.height/photo.height);
+    const w=photo.width*scale,h=photo.height*scale;
+    c.drawImage(photo,(target.width-w)/2,(target.height-h)/2,w,h);
+  }
+}
 
-    function wrapLines(text, size) {
-      ctx.font = `bold ${size}px Arial, sans-serif`;
-      const maxWidth = 900;
-      const result = [];
-
-      for (const paragraph of text.split("\n")) {
-        let line = "";
-        for (const character of paragraph) {
-          const next = line + character;
-          if (line && ctx.measureText(next).width > maxWidth) {
-            result.push(line);
-            line = character;
-          } else {
-            line = next;
-          }
-        }
-        result.push(line);
-      }
-      return result.length ? result : [""];
+function wrap(text,size,maxWidth){
+  ctx.font=`bold ${size}px Arial,sans-serif`;
+  const lines=[];
+  for(const para of text.split("\n")){
+    let line="";
+    for(const ch of para){
+      const next=line+ch;
+      if(line&&ctx.measureText(next).width>maxWidth){lines.push(line);line=ch;}
+      else line=next;
     }
+    lines.push(line);
+  }
+  return lines.length?lines:[""];
+}
 
-    function draw() {
-      ctx.fillStyle = "#eeeeee";
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
+function layoutText(item){
+  const area=item.area;
+  const maxWidth=area?Math.max(40,area.w-24):900;
+  const maxHeight=area?Math.max(30,area.h-16):500;
+  let size=Math.max(12,Number(item.size)||64);
+  let lines=wrap(item.text,size,maxWidth);
+  while(size>14&&lines.length*size*1.2>maxHeight){
+    size-=2;
+    lines=wrap(item.text,size,maxWidth);
+  }
+  return {size,lines,lineHeight:size*1.2,maxWidth};
+}
 
-      if (photo) {
-        const scale = Math.max(canvas.width / photo.width, canvas.height / photo.height);
-        const width = photo.width * scale;
-        const height = photo.height * scale;
-        ctx.drawImage(photo, (canvas.width - width) / 2, (canvas.height - height) / 2, width, height);
-      }
+function draw(){
+  drawBackground(canvas);
 
-      texts.forEach((item, index) => {
-        const lines = wrapLines(item.text, item.size);
-        const lineHeight = item.size * 1.25;
-        const firstY = item.y - ((lines.length - 1) * lineHeight) / 2;
-
-        ctx.font = `bold ${item.size}px Arial, sans-serif`;
-        ctx.textAlign = "center";
-        ctx.textBaseline = "middle";
-        ctx.lineWidth = Math.max(3, item.size / 14);
-        ctx.strokeStyle = "rgba(0,0,0,.6)";
-        ctx.fillStyle = item.color;
-
-        lines.forEach((line, lineIndex) => {
-          const y = firstY + lineIndex * lineHeight;
-          ctx.strokeText(line, item.x, y);
-          ctx.fillText(line, item.x, y);
-        });
-
-        if (index === selected) {
-          const widest = Math.max(...lines.map(line => ctx.measureText(line).width), 40);
-          const boxHeight = lines.length * lineHeight;
-          ctx.strokeStyle = "#155eef";
-          ctx.lineWidth = 4;
-          ctx.strokeRect(item.x - widest / 2 - 12, item.y - boxHeight / 2 - 8, widest + 24, boxHeight + 16);
-        }
-      });
+  objects.forEach(item=>{
+    if(item.mask){
+      ctx.fillStyle=item.mask.color;
+      ctx.fillRect(item.mask.x,item.mask.y,item.mask.w,item.mask.h);
     }
+  });
 
-    photoInput.addEventListener("change", event => {
-      const file = event.target.files[0];
-      if (!file) return;
-      const image = new Image();
-      image.onload = () => {
-        photo = image;
-        draw();
-        statusBox.textContent = "사진을 불러왔어요.";
-      };
-      image.onerror = () => { statusBox.textContent = "사진을 열지 못했어요. 다른 이미지 파일을 선택해 주세요."; };
-      image.src = URL.createObjectURL(file);
+  objects.forEach((item,index)=>{
+    const layout=layoutText(item);
+    const {size,lines,lineHeight}=layout;
+    ctx.font=`bold ${size}px Arial,sans-serif`;
+    ctx.textAlign="center";
+    ctx.textBaseline="middle";
+    ctx.lineWidth=Math.max(3,size/14);
+    ctx.strokeStyle="rgba(0,0,0,.65)";
+    ctx.fillStyle=item.color;
+    const firstY=item.y-((lines.length-1)*lineHeight)/2;
+    lines.forEach((line,i)=>{
+      const y=firstY+i*lineHeight;
+      ctx.strokeText(line,item.x,y);
+      ctx.fillText(line,item.x,y);
     });
 
-    document.getElementById("readTranslate").addEventListener("click", async () => {
-      if (!photo) {
-        statusBox.textContent = "먼저 사진을 업로드해 주세요.";
-        return;
-      }
-      if (!window.Tesseract) {
-        statusBox.textContent = "글자 읽기 도구를 불러오지 못했어요. 인터넷 연결을 확인해 주세요.";
-        return;
-      }
-
-      const button = document.getElementById("readTranslate");
-      button.disabled = true;
-
-      try {
-        const [ocrCode, sourceCode] = sourceLang.value.split("|");
-        statusBox.textContent = "사진에서 글자를 읽고 있어요. 처음에는 조금 걸릴 수 있어요.";
-
-        const worker = await Tesseract.createWorker(ocrCode, 1, {
-          logger: message => {
-            if (message.status === "recognizing text") {
-              statusBox.textContent = `사진 글자 읽는 중… ${Math.round(message.progress * 100)}%`;
-            }
-          }
-        });
-
-        const result = await worker.recognize(photo);
-        await worker.terminate();
-
-        const original = result.data.text.trim();
-        recognizedText.value = original;
-
-        if (!original) {
-          statusBox.textContent = "글자를 찾지 못했어요. 더 선명한 사진으로 다시 시도해 주세요.";
-          return;
-        }
-
-        statusBox.textContent = "읽은 글자를 번역하고 있어요.";
-        const translated = await translateLongText(original, sourceCode, targetLang.value);
-        textInput.value = translated;
-        if (selected >= 0) {
-          texts[selected].text = translated;
-          draw();
-        }
-        statusBox.textContent = "글자 읽기와 번역이 끝났어요. 번역문을 확인해 주세요.";
-      } catch (error) {
-        statusBox.textContent = "처리 중 문제가 생겼어요. 인터넷 연결을 확인하고 다시 시도해 주세요.";
-      } finally {
-        button.disabled = false;
-      }
-    });
-
-    async function translateLongText(text, from, to) {
-      const chunks = [];
-      let chunk = "";
-
-      for (const character of text) {
-        if (new TextEncoder().encode(chunk + character).length > 400 && chunk) {
-          chunks.push(chunk);
-          chunk = "";
-        }
-        chunk += character;
-      }
-      if (chunk) chunks.push(chunk);
-
-      const translatedChunks = [];
-      for (const part of chunks) {
-        const params = new URLSearchParams({
-          q: part,
-          langpair: `${from}|${to}`
-        });
-        const response = await fetch(`https://api.mymemory.translated.net/get?${params}`);
-        if (!response.ok) throw new Error("Translation request failed");
-        const data = await response.json();
-        translatedChunks.push(data.responseData.translatedText);
-      }
-      return translatedChunks.join("");
+    if(index===selected){
+      const widest=Math.max(...lines.map(line=>ctx.measureText(line).width),40);
+      ctx.strokeStyle="#155eef";
+      ctx.lineWidth=4;
+      ctx.strokeRect(item.x-widest/2-10,item.y-lines.length*lineHeight/2-7,widest+20,lines.length*lineHeight+14);
     }
+  });
 
-    document.getElementById("useTranslation").addEventListener("click", () => {
-      if (!recognizedText.value.trim()) {
-        statusBox.textContent = "먼저 사진 글자 읽고 번역을 실행해 주세요.";
-        return;
-      }
-      textInput.value = textInput.value.trim();
-      addNewText(textInput.value);
-    });
+  if(selectedArea){
+    ctx.save();
+    ctx.strokeStyle="#00a3ff";
+    ctx.lineWidth=5;
+    ctx.setLineDash([14,10]);
+    ctx.strokeRect(selectedArea.x,selectedArea.y,selectedArea.w,selectedArea.h);
+    ctx.restore();
+  }
 
-    function addNewText(value) {
-      if (!value.trim()) {
-        statusBox.textContent = "카드에 넣을 문구를 입력해 주세요.";
-        return;
-      }
-      texts.push({
-        text: value.trim(),
-        size: Math.max(12, Number(fontSizeInput.value) || 64),
-        color: textColorInput.value,
-        x: canvas.width / 2,
-        y: canvas.height / 2
-      });
-      selected = texts.length - 1;
-      draw();
-      statusBox.textContent = "텍스트를 카드에 넣었어요.";
-    }
+  if(drawingSelection&&selectionStart&&window.currentPoint){
+    const r=rectFromPoints(selectionStart,window.currentPoint);
+    ctx.save();
+    ctx.strokeStyle="#00a3ff";
+    ctx.lineWidth=5;
+    ctx.setLineDash([14,10]);
+    ctx.strokeRect(r.x,r.y,r.w,r.h);
+    ctx.restore();
+  }
+}
 
-    document.getElementById("addText").addEventListener("click", () => addNewText(textInput.value));
+function rectFromPoints(a,b){
+  return {x:Math.min(a.x,b.x),y:Math.min(a.y,b.y),w:Math.abs(a.x-b.x),h:Math.abs(a.y-b.y)};
+}
 
-    textInput.addEventListener("input", () => {
-      if (selected >= 0) {
-        texts[selected].text = textInput.value;
-        draw();
-      }
-    });
-
-    fontSizeInput.addEventListener("input", () => {
-      if (selected >= 0) {
-        texts[selected].size = Math.max(12, Number(fontSizeInput.value) || 64);
-        draw();
-      }
-    });
-
-    textColorInput.addEventListener("input", () => {
-      if (selected >= 0) {
-        texts[selected].color = textColorInput.value;
-        draw();
-      }
-    });
-
-    document.getElementById("deleteText").addEventListener("click", () => {
-      if (selected < 0) return;
-      texts.splice(selected, 1);
-      selected = -1;
-      textInput.value = "";
-      draw();
-      statusBox.textContent = "선택한 텍스트를 삭제했어요.";
-    });
-
-    function pointerPosition(event) {
-      const rect = canvas.getBoundingClientRect();
-      return {
-        x: (event.clientX - rect.left) * canvas.width / rect.width,
-        y: (event.clientY - rect.top) * canvas.height / rect.height
-      };
-    }
-
-    canvas.addEventListener("pointerdown", event => {
-      const point = pointerPosition(event);
-      selected = -1;
-
-      for (let i = texts.length - 1; i >= 0; i--) {
-        const item = texts[i];
-        const lines = wrapLines(item.text, item.size);
-        const widest = Math.max(...lines.map(line => ctx.measureText(line).width), 40);
-        const boxHeight = lines.length * item.size * 1.25;
-
-        if (Math.abs(point.x - item.x) <= widest / 2 + 16 &&
-            Math.abs(point.y - item.y) <= boxHeight / 2 + 16) {
-          selected = i;
-          dragging = true;
-          canvas.setPointerCapture(event.pointerId);
-          break;
-        }
-      }
-
-      if (selected >= 0) {
-        textInput.value = texts[selected].text;
-        fontSizeInput.value = texts[selected].size;
-        textColorInput.value = texts[selected].color;
-      }
-      draw();
-    });
-
-    canvas.addEventListener("pointermove", event => {
-      if (!dragging || selected < 0) return;
-      const point = pointerPosition(event);
-      texts[selected].x = point.x;
-      texts[selected].y = point.y;
-      draw();
-    });
-
-    canvas.addEventListener("pointerup", () => { dragging = false; });
-    canvas.addEventListener("pointercancel", () => { dragging = false; });
-
-    document.getElementById("download").addEventListener("click", () => {
-      const link = document.createElement("a");
-      link.download = "card-news.png";
-      link.href = canvas.toDataURL("image/png");
-      link.click();
-    });
-
+photoInput.addEventListener("change",event=>{
+  const file=event.target.files[0];
+  if(!file)return;
+  const image=new Image();
+  image.onload=()=>{
+    photo=image;
     draw();
-  </script>
+    statusBox.textContent="사진을 불러왔어요.";
+  };
+  image.onerror=()=>{statusBox.textContent="사진을 열지 못했어요. 다른 이미지 파일을 선택해 주세요.";};
+  image.src=URL.createObjectURL(file);
+});
+
+document.getElementById("selectArea").addEventListener("click",()=>{
+  if(!photo){statusBox.textContent="먼저 사진을 업로드해 주세요.";return;}
+  selectionMode=true;
+  selectedArea=null;
+  statusBox.textContent="미리보기에서 바꿀 제목 영역을 눌러 끌어 선택하세요.";
+});
+
+function pointerPosition(event){
+  const r=canvas.getBoundingClientRect();
+  return {x:(event.clientX-r.left)*canvas.width/r.width,y:(event.clientY-r.top)*canvas.height/r.height};
+}
+
+canvas.addEventListener("pointerdown",event=>{
+  const p=pointerPosition(event);
+
+  if(selectionMode){
+    selectionStart=p;
+    window.currentPoint=p;
+    drawingSelection=true;
+    canvas.setPointerCapture(event.pointerId);
+    draw();
+    return;
+  }
+
+  selected=-1;
+  for(let i=objects.length-1;i>=0;i--){
+    const item=objects[i],l=layoutText(item);
+    const width=Math.max(...l.lines.map(line=>{ctx.font=`bold ${l.size}px Arial,sans-serif`;return ctx.measureText(line).width;}),40);
+    const height=l.lines.length*l.lineHeight;
+    if(Math.abs(p.x-item.x)<=width/2+16&&Math.abs(p.y-item.y)<=height/2+16){
+      selected=i;
+      dragging=true;
+      canvas.setPointerCapture(event.pointerId);
+      textInput.value=item.text;
+      fontSizeInput.value=item.size;
+      textColorInput.value=item.color;
+      break;
+    }
+  }
+  draw();
+});
+
+canvas.addEventListener("pointermove",event=>{
+  const p=pointerPosition(event);
+  if(drawingSelection){
+    window.currentPoint=p;
+    draw();
+    return;
+  }
+  if(dragging&&selected>=0){
+    const item=objects[selected];
+    item.x=p.x;
+    item.y=p.y;
+    if(item.area){
+      item.x=Math.max(item.area.x+item.area.w*.15,Math.min(item.x,item.area.x+item.area.w*.85));
+      item.y=Math.max(item.area.y+item.area.h*.15,Math.min(item.y,item.area.y+item.area.h*.85));
+    }
+    draw();
+  }
+});
+
+canvas.addEventListener("pointerup",()=>{
+  if(drawingSelection){
+    selectedArea=rectFromPoints(selectionStart,window.currentPoint||selectionStart);
+    drawingSelection=false;
+    selectionMode=false;
+    window.currentPoint=null;
+    const button=document.getElementById("translateReplace");
+    button.disabled=selectedArea.w<20||selectedArea.h<20;
+    statusBox.textContent=button.disabled?"영역이 너무 작아요. 다시 선택해 주세요.":"영역을 선택했어요. 번역해 바꾸기를 누르세요.";
+    draw();
+  }
+  dragging=false;
+});
+canvas.addEventListener("pointercancel",()=>{drawingSelection=false;dragging=false;});
+
+function sampleBorderColor(area){
+  const temp=document.createElement("canvas");
+  temp.width=canvas.width;temp.height=canvas.height;
+  drawBackground(temp);
+  const c=temp.getContext("2d");
+  const points=[];
+  const step=Math.max(4,Math.floor(Math.min(area.w,area.h)/30));
+  for(let x=area.x;x<area.x+area.w;x+=step){
+    points.push([x,Math.max(0,area.y-3)],[x,Math.min(canvas.height-1,area.y+area.h+3)]);
+  }
+  for(let y=area.y;y<area.y+area.h;y+=step){
+    points.push([Math.max(0,area.x-3),y],[Math.min(canvas.width-1,area.x+area.w+3),y]);
+  }
+  let r=0,g=0,b=0,n=0;
+  for(const [x,y] of points){
+    const d=c.getImageData(Math.round(x),Math.round(y),1,1).data;
+    r+=d[0];g+=d[1];b+=d[2];n++;
+  }
+  return `rgb(${Math.round(r/n)},${Math.round(g/n)},${Math.round(b/n)})`;
+}
+
+document.getElementById("translateReplace").addEventListener("click",async()=>{
+  if(!selectedArea||!photo)return;
+  if(!window.Tesseract){statusBox.textContent="글자 읽기 도구를 불러오지 못했어요. 인터넷 연결을 확인해 주세요.";return;}
+
+  const button=document.getElementById("translateReplace");
+  button.disabled=true;
+
+  try{
+    const crop=document.createElement("canvas");
+    crop.width=Math.max(1,Math.round(selectedArea.w));
+    crop.height=Math.max(1,Math.round(selectedArea.h));
+    const source=document.createElement("canvas");
+    source.width=canvas.width;source.height=canvas.height;
+    drawBackground(source);
+    crop.getContext("2d").drawImage(source,selectedArea.x,selectedArea.y,selectedArea.w,selectedArea.h,0,0,crop.width,crop.height);
+
+    const [ocrCode,from]=sourceLang.value.split("|");
+    statusBox.textContent="선택한 영역의 글자를 읽고 있어요.";
+    const worker=await Tesseract.createWorker(ocrCode,1,{
+      logger:m=>{
+        if(m.status==="recognizing text")statusBox.textContent=`글자 읽는 중… ${Math.round(m.progress*100)}%`;
+      }
+    });
+    const result=await worker.recognize(crop);
+    await worker.terminate();
+
+    const original=result.data.text.trim();
+    recognizedText.value=original;
+    if(!original){statusBox.textContent="선택 영역에서 글자를 찾지 못했어요. 글자 주변까지 포함해 다시 선택해 주세요.";return;}
+
+    statusBox.textContent="읽은 글자를 번역하고 있어요.";
+    const translated=await translateLongText(original,from,targetLang.value);
+    textInput.value=translated;
+
+    const color=sampleBorderColor(selectedArea);
+    const newItem={
+      text:translated,
+      size:Number(fontSizeInput.value)||56,
+      color:textColorInput.value||"#ffffff",
+      x:selectedArea.x+selectedArea.w/2,
+      y:selectedArea.y+selectedArea.h/2,
+      area:{...selectedArea},
+      mask:{...selectedArea,color}
+    };
+    objects.push(newItem);
+    selected=objects.length-1;
+    selectedArea=null;
+    draw();
+    statusBox.textContent="원문 영역을 덮고 번역문을 같은 자리에 넣었어요. 문구와 글자 크기는 왼쪽에서 수정할 수 있어요.";
+  }catch(error){
+    statusBox.textContent="읽기나 번역에 문제가 생겼어요. 인터넷 연결과 언어 선택을 확인해 주세요.";
+  }finally{
+    button.disabled=false;
+  }
+});
+
+async function translateLongText(text,from,to){
+  const chunks=[];
+  let chunk="";
+  for(const ch of text){
+    if(new TextEncoder().encode(chunk+ch).length>400&&chunk){chunks.push(chunk);chunk="";}
+    chunk+=ch;
+  }
+  if(chunk)chunks.push(chunk);
+  const out=[];
+  for(const part of chunks){
+    const params=new URLSearchParams({q:part,langpair:`${from}|${to}`});
+    const response=await fetch(`https://api.mymemory.translated.net/get?${params}`);
+    if(!response.ok)throw new Error("translation failed");
+    const data=await response.json();
+    out.push(data.responseData.translatedText);
+  }
+  return out.join("");
+}
+
+function addText(value){
+  if(!value.trim()){statusBox.textContent="먼저 카드 문구를 입력해 주세요.";return;}
+  objects.push({
+    text:value.trim(),size:Number(fontSizeInput.value)||64,color:textColorInput.value,
+    x:canvas.width/2,y:canvas.height/2,area:null,mask:null
+  });
+  selected=objects.length-1;
+  draw();
+}
+
+document.getElementById("addText").addEventListener("click",()=>addText(textInput.value));
+textInput.addEventListener("input",()=>{
+  if(selected>=0){objects[selected].text=textInput.value;draw();}
+});
+fontSizeInput.addEventListener("input",()=>{
+  if(selected>=0){objects[selected].size=Number(fontSizeInput.value)||64;draw();}
+});
+textColorInput.addEventListener("input",()=>{
+  if(selected>=0){objects[selected].color=textColorInput.value;draw();}
+});
+document.getElementById("deleteText").addEventListener("click",()=>{
+  if(selected<0)return;
+  objects.splice(selected,1);
+  selected=-1;textInput.value="";
+  draw();statusBox.textContent="선택한 텍스트를 삭제했어요.";
+});
+document.getElementById("download").addEventListener("click",()=>{
+  const link=document.createElement("a");
+  link.download="card-news.png";
+  link.href=canvas.toDataURL("image/png");
+  link.click();
+});
+
+draw();
+</script>
 </body>
 </html>
