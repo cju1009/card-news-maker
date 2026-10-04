@@ -5,41 +5,11 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>카드뉴스 메이커</title>
   <style>
-    * { box-sizing: border-box; }
-    body { margin: 0; padding: 18px; color: #f4f4f5; background: #101116; font: 15px Arial, sans-serif; }
-    h1 { max-width: 1200px; margin: 0 auto 16px; font-size: 22px; }
-    .layout { display: grid; grid-template-columns: minmax(270px,330px) minmax(300px,1fr) minmax(270px,330px); gap: 16px; max-width: 1200px; margin: auto; align-items: start; }
-    .panel, .preview { background: #181a22; border: 1px solid #292c36; border-radius: 12px; padding: 16px; }
-    .field { margin-bottom: 13px; }
-    label { display: block; margin: 0 0 7px; color: #d5d6dc; font-size: 13px; font-weight: bold; }
-    input, select, textarea, button { width: 100%; padding: 10px; color: #f4f4f5; background: #111319; border: 1px solid #343743; border-radius: 7px; font: inherit; }
-    textarea { resize: vertical; min-height: 86px; }
-    input[type="file"] { padding: 9px; }
-    input[type="color"] { height: 42px; padding: 5px; }
-    input[type="range"] { padding: 0; accent-color: #6941f5; }
-    button { border: 0; background: #292c36; font-weight: bold; cursor: pointer; }
-    button.primary { background: #6941f5; }
-    button:disabled { opacity: .55; cursor: wait; }
-    .help, .status { margin-top: 6px; color: #aeb4c3; font-size: 12px; line-height: 1.5; }
-    .status { color: #c7b8ff; white-space: pre-wrap; }
-    .card-frame { max-width: 390px; margin: auto; }
-    .canvas-wrap { width: 100%; aspect-ratio: 4 / 5; background: #222032; border-radius: 10px; overflow: hidden; }
-    canvas { display: block; width: 100%; height: 100%; touch-action: none; }
-    .nav, .action, .paste-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-    .nav { margin-top: 10px; }
-    .nav button { padding: 12px; }
-    .action { margin-top: 10px; }
-    .paste-row { margin-top: 6px; }
-    .paste-row button { padding: 8px; color: #ddd; font-size: 12px; }
-    .hint { margin-top: 8px; color: #aeb4c3; font-size: 12px; line-height: 1.5; }
-    .slider-value { margin-left: 4px; color: #aaa; font-weight: normal; }
-    .section-title { margin: 2px 0 12px; font-weight: bold; }
-    @media (max-width: 850px) { .layout { grid-template-columns: 1fr; } .card-frame { max-width: min(100%, 390px); } }
+    *{box-sizing:border-box}body{margin:0;padding:18px;color:#f4f4f5;background:#101116;font:15px Arial,sans-serif}h1{max-width:1200px;margin:0 auto 16px;font-size:22px}.layout{display:grid;grid-template-columns:minmax(270px,330px) minmax(300px,1fr) minmax(270px,330px);gap:16px;max-width:1200px;margin:auto;align-items:start}.panel,.preview{background:#181a22;border:1px solid #292c36;border-radius:12px;padding:16px}.field{margin-bottom:13px}label{display:block;margin:0 0 7px;color:#d5d6dc;font-size:13px;font-weight:bold}input,select,textarea,button{width:100%;padding:10px;color:#f4f4f5;background:#111319;border:1px solid #343743;border-radius:7px;font:inherit}textarea{resize:vertical;min-height:86px}input[type=file]{padding:9px}input[type=color]{height:42px;padding:5px}input[type=range]{padding:0;accent-color:#6941f5}button{border:0;background:#292c36;font-weight:bold;cursor:pointer}button.primary{background:#6941f5}button:disabled{opacity:.55;cursor:wait}.help,.status{margin-top:6px;color:#aeb4c3;font-size:12px;line-height:1.5}.status{color:#c7b8ff;white-space:pre-wrap}.card-frame{max-width:390px;margin:auto}.canvas-wrap{width:100%;aspect-ratio:4/5;background:#222032;border-radius:10px;overflow:hidden}.canvas-wrap canvas{width:100%;height:100%;display:block;touch-action:none}.nav,.action,.paste-row{display:grid;grid-template-columns:1fr 1fr;gap:8px}.nav{margin-top:10px}.nav button{padding:12px}.action{margin-top:10px}.paste-row{margin-top:6px}.paste-row button{padding:8px;color:#ddd;font-size:12px}.hint{margin-top:8px;color:#aeb4c3;font-size:12px;line-height:1.5}.slider-value{margin-left:4px;color:#aaa;font-weight:normal}.section-title{margin:2px 0 12px;font-weight:bold}.small-button{margin-top:7px;padding:9px;font-size:13px}@media(max-width:850px){.layout{grid-template-columns:1fr}.card-frame{max-width:min(100%,390px)}}
   </style>
 </head>
 <body>
   <h1>카드뉴스 메이커</h1>
-
   <main class="layout">
     <section class="panel">
       <div class="field">
@@ -47,7 +17,6 @@
         <input id="workerUrl" type="url" placeholder="Cloudflare Worker 주소를 입력하세요">
         <div class="help">접속 암호가 포함된 주소예요. 이 주소를 다른 사람과 공유하지 마세요.</div>
       </div>
-
       <div class="field">
         <label for="sourceImage">① 번역할 문구가 있는 사진</label>
         <input id="sourceImage" type="file" accept="image/*">
@@ -55,27 +24,20 @@
           <button type="button" id="pasteSourceButton">캡처 붙여넣기 대상으로 선택</button>
           <button type="button" id="clearSourceButton">선택 취소</button>
         </div>
-        <div class="help">사진 속 큰 제목만 읽어 번역해요. 이 사진 자체는 카드에 들어가지 않습니다.</div>
+        <div class="help">큰 제목만 읽어 자연스럽게 번역합니다. 이 사진은 카드에 들어가지 않아요.</div>
       </div>
-
       <div class="field">
         <label for="targetLanguage">번역할 언어</label>
         <select id="targetLanguage">
-          <option>한국어</option>
-          <option>영어</option>
-          <option>일본어</option>
-          <option>중국어(간체)</option>
-          <option>스페인어</option>
-          <option>프랑스어</option>
-          <option>독일어</option>
+          <option>한국어</option><option>영어</option><option>일본어</option>
+          <option>중국어(간체)</option><option>스페인어</option>
+          <option>프랑스어</option><option>독일어</option>
         </select>
       </div>
-
       <div class="field">
         <button id="translateButton" class="primary">사진 속 큰 글씨 번역</button>
         <div id="status" class="status" role="status"></div>
       </div>
-
       <div class="field">
         <label for="backgroundImage">② 번역된 글씨를 얹을 배경 사진</label>
         <input id="backgroundImage" type="file" accept="image/*">
@@ -83,9 +45,8 @@
           <button type="button" id="pasteBackgroundButton">캡처 붙여넣기 대상으로 선택</button>
           <button type="button" id="clearBackgroundButton">선택 취소</button>
         </div>
-        <div class="help">이 사진만 카드 배경으로 사용돼요. 번역 요청에는 보내지 않습니다.</div>
+        <div class="help">이 사진만 카드 배경으로 사용됩니다. 번역 요청에는 보내지 않아요.</div>
       </div>
-
       <div class="action">
         <button id="addCardButton">카드 추가</button>
         <button id="downloadButton" class="primary">현재 카드 PNG 다운로드</button>
@@ -94,12 +55,14 @@
 
     <section class="preview">
       <div class="card-frame">
-        <div class="canvas-wrap"><canvas id="cardCanvas" width="1080" height="1350"></canvas></div>
+        <div class="canvas-wrap">
+          <canvas id="cardCanvas" width="1080" height="1350"></canvas>
+        </div>
         <div class="nav">
           <button id="previousButton">이전 카드</button>
           <button id="nextButton">다음 카드</button>
         </div>
-        <div class="hint">번역 제목은 사진 위에 표시돼요. 미리보기에서 제목을 끌어 위치를 옮길 수 있습니다.</div>
+        <div class="hint">미리보기에서 제목을 끌어 위치를 옮길 수 있어요.</div>
       </div>
     </section>
 
@@ -110,12 +73,28 @@
         <textarea id="translatedTitle" placeholder="먼저 왼쪽에서 사진 속 큰 글씨를 번역하세요."></textarea>
       </div>
       <div class="field">
+        <label for="fontStyle">글자 모양</label>
+        <select id="fontStyle">
+          <option value="malgun">굵은 고딕</option>
+          <option value="gulim">굴림체</option>
+          <option value="batang">바탕체</option>
+          <option value="gungsuh">궁서체</option>
+        </select>
+      </div>
+      <div class="field">
         <label for="fontSize">글자 크기 <span id="fontSizeValue" class="slider-value"></span></label>
         <input id="fontSize" type="range" min="42" max="112" value="72">
       </div>
       <div class="field">
-        <label for="textColor">글자 색</label>
+        <label for="textColor">기본 글자 색</label>
         <input id="textColor" type="color" value="#ffffff">
+        <div class="help">아직 따로 색을 지정하지 않은 글자에 적용되는 색입니다.</div>
+      </div>
+      <div class="field">
+        <label for="selectionColor">선택한 글자 색</label>
+        <input id="selectionColor" type="color" value="#ffd166">
+        <button type="button" id="applySelectedColor" class="small-button">선택한 글자에만 색 적용</button>
+        <div class="help">제목 입력란에서 색을 바꿀 부분을 드래그해 선택한 뒤 색을 고르고 버튼을 누르세요. 다른 글자 색은 유지됩니다.</div>
       </div>
       <div class="field">
         <label for="gradientStrength">글자 뒤 그라데이션 강도 <span id="gradientValue" class="slider-value">55%</span></label>
@@ -134,68 +113,96 @@
     const canvas = $("cardCanvas");
     const ctx = canvas.getContext("2d");
     const cards = [{
-      title: "",
-      image: null,
-      x: 540,
-      y: 675,
-      fontSize: 72,
-      color: "#ffffff",
-      gradient: 55,
-      fallback: "#242033"
+      title: "", image: null, x: 540, y: 675, fontSize: 72,
+      fontStyle: "malgun", color: "#ffffff", colorRanges: [],
+      gradient: 55, fallback: "#242033"
     }];
-
+    const fontStyles = {
+      malgun: '"Malgun Gothic", "맑은 고딕", Arial, sans-serif',
+      gulim: 'Gulim, "굴림", sans-serif',
+      batang: 'Batang, "바탕", serif',
+      gungsuh: 'Gungsuh, "궁서", serif'
+    };
     let current = 0;
     let dragging = false;
-    let dragOffset = { x: 0, y: 0 };
+    let dragOffset = {x: 0, y: 0};
     let pasteTarget = "sourceImage";
-
+    let savedSelection = {start: 0, end: 0};
     const card = () => cards[current];
 
     $("workerUrl").value = localStorage.getItem("cardNewsWorkerUrl") || "";
-    $("workerUrl").addEventListener("input", () => {
-      localStorage.setItem("cardNewsWorkerUrl", $("workerUrl").value);
-    });
+    $("workerUrl").addEventListener("input", () =>
+      localStorage.setItem("cardNewsWorkerUrl", $("workerUrl").value)
+    );
+
+    function rememberSelection() {
+      const field = $("translatedTitle");
+      savedSelection = {start: field.selectionStart, end: field.selectionEnd};
+    }
 
     function saveInputs() {
-      card().title = $("translatedTitle").value;
-      card().fontSize = Number($("fontSize").value);
-      card().color = $("textColor").value;
-      card().gradient = Number($("gradientStrength").value);
-      card().fallback = $("fallbackColor").value;
+      const c = card();
+      const newTitle = $("translatedTitle").value;
+      if (newTitle !== c.title) c.colorRanges = [];
+      c.title = newTitle;
+      c.fontStyle = $("fontStyle").value;
+      c.fontSize = Number($("fontSize").value);
+      c.color = $("textColor").value;
+      c.gradient = Number($("gradientStrength").value);
+      c.fallback = $("fallbackColor").value;
     }
 
     function loadCard() {
       const c = card();
       $("translatedTitle").value = c.title;
+      $("fontStyle").value = c.fontStyle || "malgun";
       $("fontSize").value = c.fontSize;
       $("fontSizeValue").textContent = `${c.fontSize}px`;
       $("textColor").value = c.color;
       $("gradientStrength").value = c.gradient;
       $("gradientValue").textContent = `${c.gradient}%`;
       $("fallbackColor").value = c.fallback;
+      savedSelection = {start: 0, end: 0};
       draw();
     }
 
-    function wrapText(text, maxWidth) {
+    function textLines(text, maxWidth) {
       const lines = [];
-      for (const paragraph of String(text || "").split("\n")) {
-        if (!paragraph) {
-          lines.push("");
+      let line = [];
+      let lineText = "";
+      let index = 0;
+
+      for (const char of text) {
+        if (char === "\n") {
+          lines.push(line);
+          line = [];
+          lineText = "";
+          index += char.length;
           continue;
         }
-        let line = "";
-        for (const char of paragraph) {
-          const test = line + char;
-          if (line && ctx.measureText(test).width > maxWidth) {
-            lines.push(line);
-            line = char;
-          } else {
-            line = test;
-          }
+
+        const candidate = lineText + char;
+        if (line.length && ctx.measureText(candidate).width > maxWidth) {
+          lines.push(line);
+          line = [];
+          lineText = "";
         }
-        if (line) lines.push(line);
+
+        line.push({char, index});
+        lineText += char;
+        index += char.length;
       }
+
+      if (line.length || !lines.length) lines.push(line);
       return lines;
+    }
+
+    function colorForIndex(index, c) {
+      for (let i = c.colorRanges.length - 1; i >= 0; i--) {
+        const range = c.colorRanges[i];
+        if (index >= range.start && index < range.end) return range.color;
+      }
+      return c.color;
     }
 
     function draw() {
@@ -227,27 +234,45 @@
           Math.min(canvas.height, c.y + fadeHeight / 2)
         );
         grad.addColorStop(0, "rgba(0,0,0,0)");
-        grad.addColorStop(0.25, `rgba(0,0,0,${strength * 0.62})`);
-        grad.addColorStop(0.72, `rgba(0,0,0,${strength * 0.9})`);
-        grad.addColorStop(1, `rgba(0,0,0,${strength * 0.55})`);
+        grad.addColorStop(.25, `rgba(0,0,0,${strength * .62})`);
+        grad.addColorStop(.72, `rgba(0,0,0,${strength * .9})`);
+        grad.addColorStop(1, `rgba(0,0,0,${strength * .55})`);
         ctx.fillStyle = grad;
         ctx.fillRect(0, 0, canvas.width, canvas.height);
       }
 
-      ctx.font = `bold ${c.fontSize}px Arial, sans-serif`;
-      ctx.textAlign = "center";
+      ctx.font = `bold ${c.fontSize}px ${fontStyles[c.fontStyle] || fontStyles.malgun}`;
       ctx.textBaseline = "middle";
-      const lines = wrapText(title, 900);
+      const lines = textLines(title, 900);
       const lineHeight = c.fontSize * 1.28;
       const startY = c.y - (lines.length - 1) * lineHeight / 2;
       ctx.lineWidth = Math.max(2, c.fontSize / 18);
-      ctx.strokeStyle = "rgba(0,0,0,.45)";
-      ctx.fillStyle = c.color;
+      ctx.strokeStyle = "rgba(0,0,0,.5)";
 
-      lines.forEach((line, i) => {
-        const y = startY + i * lineHeight;
-        ctx.strokeText(line, c.x, y, 920);
-        ctx.fillText(line, c.x, y, 920);
+      lines.forEach((line, lineIndex) => {
+        const fullLine = line.map((item) => item.char).join("");
+        let x = c.x - ctx.measureText(fullLine).width / 2;
+        const y = startY + lineIndex * lineHeight;
+        let i = 0;
+
+        // 같은 색의 글자끼리 이어서 그려 자간과 글자 모양이 깨지는 것을 줄입니다.
+        while (i < line.length) {
+          const runColor = colorForIndex(line[i].index, c);
+          let runText = line[i].char;
+          let j = i + 1;
+
+          while (j < line.length && colorForIndex(line[j].index, c) === runColor) {
+            runText += line[j].char;
+            j++;
+          }
+
+          const runWidth = ctx.measureText(runText).width;
+          ctx.fillStyle = runColor;
+          ctx.strokeText(runText, x, y);
+          ctx.fillText(runText, x, y);
+          x += runWidth;
+          i = j;
+        }
       });
     }
 
@@ -272,7 +297,7 @@
       const workerAddress = $("workerUrl").value.trim();
 
       if (!file) {
-        $("status").textContent = "먼저 번역할 문구가 있는 사진을 선택하거나 캡처를 붙여넣으세요.";
+        $("status").textContent = "번역할 사진을 선택하거나 캡처를 붙여넣으세요.";
         return;
       }
       if (!workerAddress) {
@@ -282,7 +307,7 @@
 
       const button = $("translateButton");
       button.disabled = true;
-      $("status").textContent = "사진에서 큰 제목을 읽고 번역하고 있어요…";
+      $("status").textContent = "사진에서 큰 제목을 읽고 자연스럽게 다듬고 있어요…";
 
       try {
         const imageDataUri = await new Promise((resolve, reject) => {
@@ -294,7 +319,7 @@
 
         const response = await fetch(workerAddress, {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers: {"Content-Type": "application/json"},
           body: JSON.stringify({
             imageDataUri,
             targetLanguage: $("targetLanguage").value
@@ -302,17 +327,15 @@
         });
 
         const result = await response.json();
-        if (!response.ok) {
-          throw new Error(result.error || `요청 오류 (${response.status})`);
-        }
-        if (!result.title) {
-          throw new Error("번역된 제목을 받지 못했습니다.");
-        }
+        if (!response.ok) throw new Error(result.error || `요청 오류 (${response.status})`);
+        if (!result.title) throw new Error("번역된 제목을 받지 못했습니다.");
 
         saveInputs();
         card().title = result.title;
+        card().colorRanges = [];
         loadCard();
-        $("status").textContent = "번역이 끝났어요. 오른쪽에서 제목을 수정할 수 있습니다.";
+        $("status").textContent =
+          "번역이 끝났어요. 제목을 고치거나 일부 글자색을 바꿔보세요.";
       } catch (error) {
         $("status").textContent = `번역 오류: ${error.message}`;
       } finally {
@@ -332,22 +355,17 @@
       }
     });
 
-    $("sourceImage").addEventListener("click", () => {
-      pasteTarget = "sourceImage";
-    });
-    $("backgroundImage").addEventListener("click", () => {
-      pasteTarget = "backgroundImage";
-    });
+    $("sourceImage").addEventListener("click", () => { pasteTarget = "sourceImage"; });
+    $("backgroundImage").addEventListener("click", () => { pasteTarget = "backgroundImage"; });
 
     $("pasteSourceButton").addEventListener("click", () => {
       pasteTarget = "sourceImage";
-      $("status").textContent = "번역용 칸을 선택했어요. Win+Shift+S로 캡처한 뒤 Ctrl+V를 누르세요.";
+      $("status").textContent = "번역용 칸을 선택했어요. 캡처한 뒤 Ctrl+V를 누르세요.";
     });
     $("pasteBackgroundButton").addEventListener("click", () => {
       pasteTarget = "backgroundImage";
-      $("status").textContent = "배경 사진 칸을 선택했어요. Win+Shift+S로 캡처한 뒤 Ctrl+V를 누르세요.";
+      $("status").textContent = "배경 사진 칸을 선택했어요. 캡처한 뒤 Ctrl+V를 누르세요.";
     });
-
     $("clearSourceButton").addEventListener("click", () => {
       $("sourceImage").value = "";
       $("status").textContent = "번역용 사진 선택을 취소했어요.";
@@ -369,9 +387,11 @@
         if (!blob) continue;
 
         event.preventDefault();
-        const file = new File([blob], `pasted-image-${Date.now()}.png`, {
-          type: blob.type || "image/png"
-        });
+        const file = new File(
+          [blob],
+          `pasted-image-${Date.now()}.png`,
+          {type: blob.type || "image/png"}
+        );
 
         if (pasteTarget === "sourceImage") {
           const transfer = new DataTransfer();
@@ -392,27 +412,44 @@
       }
     });
 
+    $("translatedTitle").addEventListener("select", rememberSelection);
+    $("translatedTitle").addEventListener("keyup", rememberSelection);
+    $("translatedTitle").addEventListener("mouseup", rememberSelection);
     $("translatedTitle").addEventListener("input", () => {
       saveInputs();
       draw();
+      rememberSelection();
     });
     $("fontSize").addEventListener("input", () => {
       saveInputs();
       $("fontSizeValue").textContent = `${$("fontSize").value}px`;
       draw();
     });
-    $("textColor").addEventListener("input", () => {
-      saveInputs();
-      draw();
-    });
+    $("fontStyle").addEventListener("change", () => { saveInputs(); draw(); });
+    $("textColor").addEventListener("input", () => { saveInputs(); draw(); });
     $("gradientStrength").addEventListener("input", () => {
       saveInputs();
       $("gradientValue").textContent = `${$("gradientStrength").value}%`;
       draw();
     });
-    $("fallbackColor").addEventListener("input", () => {
+    $("fallbackColor").addEventListener("input", () => { saveInputs(); draw(); });
+
+    $("applySelectedColor").addEventListener("click", () => {
+      const {start, end} = savedSelection;
+      if (start === end) {
+        $("status").textContent =
+          "먼저 제목 입력란에서 색을 바꿀 글자를 드래그해 선택하세요.";
+        return;
+      }
+
       saveInputs();
+      card().colorRanges.push({
+        start,
+        end,
+        color: $("selectionColor").value
+      });
       draw();
+      $("status").textContent = "선택한 글자에만 색을 적용했어요.";
     });
 
     $("previousButton").addEventListener("click", () => {
@@ -434,7 +471,9 @@
         x: 540,
         y: 675,
         fontSize: previous.fontSize,
+        fontStyle: previous.fontStyle,
         color: previous.color,
+        colorRanges: [],
         gradient: previous.gradient,
         fallback: previous.fallback
       });
@@ -462,7 +501,7 @@
     canvas.addEventListener("pointerdown", (event) => {
       const p = pointerPosition(event);
       dragging = true;
-      dragOffset = { x: p.x - card().x, y: p.y - card().y };
+      dragOffset = {x: p.x - card().x, y: p.y - card().y};
       canvas.setPointerCapture(event.pointerId);
     });
     canvas.addEventListener("pointermove", (event) => {
