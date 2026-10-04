@@ -1,412 +1,77 @@
 <!doctype html>
 <html lang="ko">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>카드뉴스 메이커</title>
-  <style>
-    * { box-sizing: border-box; }
-    body {
-      margin: 0;
-      padding: 20px;
-      color: #f4f4f5;
-      background: #101116;
-      font: 15px Arial, sans-serif;
-    }
-    h1 { max-width: 1200px; margin: 0 auto 16px; font-size: 22px; }
-    .layout {
-      display: grid;
-      grid-template-columns: minmax(260px, 330px) minmax(300px, 1fr) minmax(260px, 300px);
-      gap: 16px;
-      max-width: 1200px;
-      margin: 0 auto;
-      align-items: start;
-    }
-    .panel, .preview {
-      padding: 16px;
-      border: 1px solid #292c36;
-      border-radius: 12px;
-      background: #181a22;
-    }
-    label {
-      display: block;
-      margin: 13px 0 6px;
-      color: #d5d6dc;
-      font-size: 13px;
-      font-weight: bold;
-    }
-    input, select, textarea, button {
-      width: 100%;
-      padding: 10px;
-      color: #f4f4f5;
-      background: #111319;
-      border: 1px solid #343743;
-      border-radius: 7px;
-      font: inherit;
-    }
-    textarea { min-height: 86px; resize: vertical; line-height: 1.5; }
-    input[type="color"] { height: 42px; padding: 4px; }
-    input[type="range"] { padding: 0; accent-color: #6847ff; }
-    input[type="file"] { padding: 8px; }
-    button {
-      border: 0;
-      background: #6745f5;
-      font-weight: bold;
-      cursor: pointer;
-    }
-    button:hover { background: #785bff; }
-    button.secondary { background: #292c36; }
-    button:disabled { opacity: .5; cursor: default; }
-    small, .help, #status { color: #a9abb6; line-height: 1.5; }
-    .help { margin: 8px 0; font-size: 12px; }
-    #status { min-height: 24px; margin: 8px 0; font-size: 13px; }
-    .canvas-wrap {
-      width: 100%;
-      max-width: 300px;
-      margin: 0 auto;
-      overflow: hidden;
-      border-radius: 9px;
-      background: #242236;
-    }
-    canvas {
-      display: block;
-      width: 100%;
-      height: auto;
-      aspect-ratio: 4 / 5;
-      touch-action: none;
-      cursor: grab;
-    }
-    canvas:active { cursor: grabbing; }
-    .row { display: flex; gap: 8px; margin-top: 10px; }
-    .row button { flex: 1; }
-    .counter { margin: 8px 0; color: #a9abb6; text-align: center; font-size: 12px; }
-    @media (max-width: 900px) {
-      body { padding: 14px; }
-      .layout { grid-template-columns: 1fr; }
-      .canvas-wrap { max-width: min(100%, 360px); }
-    }
-  </style>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>카드뉴스 메이커</title>
+<style>
+*{box-sizing:border-box}body{margin:0;padding:16px 20px;color:#f4f4f5;background:#101116;font:15px Arial,sans-serif}h1{max-width:1200px;margin:0 auto 16px;font-size:22px}.layout{display:grid;grid-template-columns:minmax(260px,330px) minmax(300px,1fr) minmax(260px,300px);gap:16px;max-width:1200px;margin:auto;align-items:start}.panel,.preview{background:#181a22;border:1px solid #292c36;border-radius:12px;padding:16px}.preview{min-width:0}.field{margin-bottom:13px}label{display:block;margin:0 0 7px;color:#d5d6dc;font-size:13px;font-weight:bold}input,select,textarea,button{width:100%;padding:10px;color:#f4f4f5;background:#111319;border:1px solid #343743;border-radius:7px;font:inherit}textarea{resize:vertical;min-height:78px}button{border:0;background:#292c36;font-weight:bold;cursor:pointer}button:hover{filter:brightness(1.12)}button.primary{background:#6844f5}button:disabled{opacity:.55;cursor:wait}.hint,.status{color:#aeb3c2;font-size:12px;line-height:1.5}.status{min-height:18px;margin:8px 0 12px}.row{display:flex;gap:8px}.row button{flex:1}.canvas-wrap{width:min(100%,360px);margin:0 auto 10px}.card-canvas{display:block;width:100%;aspect-ratio:1080/1350;background:#252235;border-radius:10px;touch-action:none}.controls{max-width:360px;margin:auto}.controls .row{margin:8px 0}.controls input[type=range]{padding:0;accent-color:#6844f5}.controls input[type=color]{height:42px;padding:4px}.file-input{padding:8px}.footer-buttons{display:grid;grid-template-columns:1fr 1fr;gap:8px}.section-title{margin:12px 0 8px;color:#d5d6dc;font-size:13px;font-weight:bold}@media(max-width:900px){.layout{grid-template-columns:1fr;max-width:540px}.canvas-wrap{width:min(100%,340px)}.preview{order:2}.right-panel{order:3}}@media(max-width:480px){body{padding:12px}.panel,.preview{padding:13px}}
+</style>
 </head>
 <body>
-  <h1>카드뉴스 메이커</h1>
-
-  <main class="layout">
-    <section class="panel">
-      <label for="workerUrl">AI 연결 주소</label>
-      <input id="workerUrl" type="url" placeholder="Cloudflare Worker 주소를 입력하세요">
-      <p class="help">접속 암호가 포함된 주소예요. 다른 사람과 공유하지 마세요.</p>
-
-      <label for="caption">번역할 캡션 (직접 입력)</label>
-      <textarea id="caption" placeholder="번역할 캡션을 붙여넣으세요."></textarea>
-
-      <label for="language">제목 언어</label>
-      <select id="language">
-        <option value="한국어">한국어</option>
-        <option value="영어">English</option>
-        <option value="일본어">日本語</option>
-      </select>
-
-      <label>제목 번역</label>
-      <button id="translateButton">제목 번역</button>
-      <p id="status"></p>
-      <p class="help">입력한 캡션 텍스트만 Gemini로 전송됩니다. 사진은 전송되지 않습니다.</p>
-
-      <label for="imageFile">카드 사진 (직접 업로드)</label>
-      <input id="imageFile" type="file" accept="image/*">
-      <p class="help">사진은 이 브라우저에서 카드 배경으로 사용됩니다.</p>
-
-      <div class="row">
-        <button id="addCardButton" class="secondary">카드 추가</button>
-        <button id="downloadButton">현재 카드 PNG 다운로드</button>
-      </div>
-    </section>
-
-    <section class="preview">
-      <div class="canvas-wrap">
-        <canvas id="cardCanvas" width="1080" height="1350"></canvas>
-      </div>
-      <div class="row">
-        <button id="previousButton" class="secondary">이전 카드</button>
-        <button id="nextButton" class="secondary">다음 카드</button>
-      </div>
-      <p class="counter" id="cardCounter"></p>
-      <p class="help">미리보기의 제목이나 본문을 끌어 위치를 조절할 수 있어요.</p>
-    </section>
-
-    <section class="panel">
-      <label for="titleInput">제목 (번역 후 직접 수정 가능)</label>
-      <textarea id="titleInput" placeholder="캡션을 번역하면 제목이 여기에 들어옵니다."></textarea>
-
-      <label for="bodyInput">본문 (직접 입력)</label>
-      <textarea id="bodyInput" placeholder="카드에 넣을 본문을 직접 입력하세요."></textarea>
-
-      <label for="activeText">크기 조절할 글자</label>
-      <select id="activeText">
-        <option value="title">제목</option>
-        <option value="body">본문</option>
-      </select>
-
-      <label for="fontSize">글자 크기</label>
-      <input id="fontSize" type="range" min="24" max="120" value="72">
-
-      <label for="textColor">글자 색</label>
-      <input id="textColor" type="color" value="#ffffff">
-
-      <label for="backgroundColor">배경 색</label>
-      <input id="backgroundColor" type="color" value="#242236">
-    </section>
-  </main>
-
-  <script>
-    const canvas = document.getElementById("cardCanvas");
-    const ctx = canvas.getContext("2d");
-    const workerUrlInput = document.getElementById("workerUrl");
-    const captionInput = document.getElementById("caption");
-    const languageInput = document.getElementById("language");
-    const titleInput = document.getElementById("titleInput");
-    const bodyInput = document.getElementById("bodyInput");
-    const activeTextInput = document.getElementById("activeText");
-    const fontSizeInput = document.getElementById("fontSize");
-    const textColorInput = document.getElementById("textColor");
-    const backgroundColorInput = document.getElementById("backgroundColor");
-    const statusText = document.getElementById("status");
-
-    workerUrlInput.value = localStorage.getItem("cardNewsWorkerUrl") || "";
-    workerUrlInput.addEventListener("input", () => {
-      localStorage.setItem("cardNewsWorkerUrl", workerUrlInput.value.trim());
-    });
-
-    function newCard() {
-      return {
-        title: "",
-        body: "",
-        image: null,
-        titleX: 540,
-        titleY: 790,
-        bodyX: 540,
-        bodyY: 1020,
-        titleSize: 76,
-        bodySize: 46,
-        textColor: "#ffffff",
-        backgroundColor: "#242236"
-      };
-    }
-
-    const cards = [newCard()];
-    let currentCard = 0;
-    let dragging = false;
-    let dragOffsetX = 0;
-    let dragOffsetY = 0;
-
-    function card() { return cards[currentCard]; }
-
-    function loadCard() {
-      titleInput.value = card().title;
-      bodyInput.value = card().body;
-      textColorInput.value = card().textColor;
-      backgroundColorInput.value = card().backgroundColor;
-      fontSizeInput.value = activeTextInput.value === "title"
-        ? card().titleSize
-        : card().bodySize;
-      updateCounter();
-      draw();
-    }
-
-    function saveInputs() {
-      card().title = titleInput.value;
-      card().body = bodyInput.value;
-      card().textColor = textColorInput.value;
-      card().backgroundColor = backgroundColorInput.value;
-      if (activeTextInput.value === "title") {
-        card().titleSize = Number(fontSizeInput.value);
-      } else {
-        card().bodySize = Number(fontSizeInput.value);
-      }
-      draw();
-    }
-
-    function wrapText(text, maxWidth, fontSize) {
-      const lines = [];
-      let line = "";
-      for (const character of text) {
-        if (character === "\n") {
-          lines.push(line);
-          line = "";
-          continue;
-        }
-        const candidate = line + character;
-        if (line && ctx.measureText(candidate).width > maxWidth) {
-          lines.push(line);
-          line = character;
-        } else {
-          line = candidate;
-        }
-      }
-      if (line) lines.push(line);
-      return lines;
-    }
-
-    function drawText(text, x, y, size, maxLines) {
-      if (!text) return;
-      ctx.font = `bold ${size}px Arial, "Noto Sans KR", sans-serif`;
-      ctx.textAlign = "center";
-      ctx.textBaseline = "top";
-      ctx.fillStyle = card().textColor;
-      ctx.shadowColor = "rgba(0,0,0,.75)";
-      ctx.shadowBlur = 8;
-      const lines = wrapText(text, 920, size).slice(0, maxLines);
-      const lineHeight = size * 1.2;
-      lines.forEach((line, index) => {
-        ctx.fillText(line, x, y + index * lineHeight);
-      });
-      ctx.shadowBlur = 0;
-    }
-
-    function draw() {
-      const c = card();
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      ctx.fillStyle = c.backgroundColor;
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-      if (c.image && c.image.complete) {
-        const scale = Math.max(canvas.width / c.image.width, canvas.height / c.image.height);
-        const width = c.image.width * scale;
-        const height = c.image.height * scale;
-        ctx.drawImage(c.image, (canvas.width - width) / 2, (canvas.height - height) / 2, width, height);
-        const gradient = ctx.createLinearGradient(0, 500, 0, 1350);
-        gradient.addColorStop(0, "rgba(0,0,0,0)");
-        gradient.addColorStop(1, "rgba(0,0,0,.78)");
-        ctx.fillStyle = gradient;
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
-      }
-
-      drawText(c.title, c.titleX, c.titleY, c.titleSize, 5);
-      drawText(c.body, c.bodyX, c.bodyY, c.bodySize, 8);
-      document.getElementById("cardCounter").textContent =
-        `카드 ${currentCard + 1} / ${cards.length} · 1080 × 1350`;
-    }
-
-    [titleInput, bodyInput, textColorInput, backgroundColorInput, fontSizeInput]
-      .forEach((element) => element.addEventListener("input", saveInputs));
-
-    activeTextInput.addEventListener("change", () => {
-      fontSizeInput.value = activeTextInput.value === "title"
-        ? card().titleSize
-        : card().bodySize;
-    });
-
-    document.getElementById("imageFile").addEventListener("change", (event) => {
-      const file = event.target.files[0];
-      if (!file) return;
-      const reader = new FileReader();
-      reader.onload = () => {
-        const image = new Image();
-        image.onload = () => {
-          card().image = image;
-          draw();
-        };
-        image.src = reader.result;
-      };
-      reader.readAsDataURL(file);
-    });
-
-    document.getElementById("translateButton").addEventListener("click", async () => {
-      const workerUrl = workerUrlInput.value.trim();
-      const caption = captionInput.value.trim();
-
-      if (!workerUrl) {
-        statusText.textContent = "먼저 AI 연결 주소를 입력해 주세요.";
-        return;
-      }
-      if (!caption) {
-        statusText.textContent = "번역할 캡션을 입력해 주세요.";
-        return;
-      }
-
-      statusText.textContent = "제목을 번역하고 있어요…";
-      const button = document.getElementById("translateButton");
-      button.disabled = true;
-
-      try {
-        const response = await fetch(workerUrl, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            caption,
-            targetLanguage: languageInput.value
-          })
-        });
-        const result = await response.json();
-        if (!response.ok) throw new Error(result.error || "번역 요청에 실패했습니다.");
-
-        const translatedTitle = result.cards?.[0]?.title || result.title;
-        if (!translatedTitle) throw new Error("번역 결과가 비어 있습니다.");
-
-        titleInput.value = translatedTitle;
-        card().title = translatedTitle;
-        statusText.textContent = "제목 번역이 끝났어요. 제목을 직접 수정할 수도 있어요.";
-        draw();
-      } catch (error) {
-        statusText.textContent = `번역 오류: ${error.message}`;
-      } finally {
-        button.disabled = false;
-      }
-    });
-
-    function changeCard(index) {
-      saveInputs();
-      currentCard = Math.max(0, Math.min(cards.length - 1, index));
-      loadCard();
-    }
-
-    document.getElementById("previousButton").addEventListener("click", () => {
-      changeCard(currentCard - 1);
-    });
-    document.getElementById("nextButton").addEventListener("click", () => {
-      changeCard(currentCard + 1);
-    });
-    document.getElementById("addCardButton").addEventListener("click", () => {
-      saveInputs();
-      cards.push(newCard());
-      currentCard = cards.length - 1;
-      loadCard();
-    });
-
-    canvas.addEventListener("pointerdown", (event) => {
-      const rect = canvas.getBoundingClientRect();
-      const x = (event.clientX - rect.left) * canvas.width / rect.width;
-      const y = (event.clientY - rect.top) * canvas.height / rect.height;
-      const textType = activeTextInput.value;
-      const c = card();
-      dragging = true;
-      dragOffsetX = x - c[`${textType}X`];
-      dragOffsetY = y - c[`${textType}Y`];
-      canvas.setPointerCapture(event.pointerId);
-    });
-
-    canvas.addEventListener("pointermove", (event) => {
-      if (!dragging) return;
-      const rect = canvas.getBoundingClientRect();
-      const x = (event.clientX - rect.left) * canvas.width / rect.width;
-      const y = (event.clientY - rect.top) * canvas.height / rect.height;
-      const textType = activeTextInput.value;
-      card()[`${textType}X`] = Math.max(80, Math.min(1000, x - dragOffsetX));
-      card()[`${textType}Y`] = Math.max(40, Math.min(1250, y - dragOffsetY));
-      draw();
-    });
-
-    canvas.addEventListener("pointerup", () => { dragging = false; });
-    canvas.addEventListener("pointercancel", () => { dragging = false; });
-
-    document.getElementById("downloadButton").addEventListener("click", () => {
-      draw();
-      const link = document.createElement("a");
-      link.download = `card-news-${currentCard + 1}.png`;
-      link.href = canvas.toDataURL("image/png");
-      link.click();
-    });
-
-    loadCard();
-  </script>
+<h1>카드뉴스 메이커</h1>
+<main class="layout">
+<section class="panel">
+<div class="field"><label for="workerUrl">AI 연결 주소</label><input id="workerUrl" type="url" placeholder="Cloudflare Worker 주소를 입력하세요"><div class="hint">접속 암호가 포함된 주소예요. 다른 사람과 공유하지 마세요.</div></div>
+<div class="field"><label for="caption">번역할 캡션 (직접 입력)</label><textarea id="caption" placeholder="번역할 캡션을 붙여넣으세요."></textarea></div>
+<div class="field"><label for="targetLanguage">제목 언어</label><select id="targetLanguage"><option value="Korean">한국어</option><option value="English">영어</option><option value="Japanese">일본어</option></select></div>
+<div class="field"><label>제목 번역</label><button id="translateButton" class="primary">제목 번역</button><div id="status" class="status"></div></div>
+<p class="hint">입력한 캡션 텍스트만 Gemini로 전송됩니다. 사진은 전송되지 않습니다.</p>
+<div class="field"><label for="photoInput">카드 사진 (직접 업로드 또는 붙여넣기)</label><input id="photoInput" class="file-input" type="file" accept="image/*"><div class="hint">사진 선택 또는 화면을 캡처(Win+Shift+S)한 뒤 이 페이지에서 Ctrl+V로 붙여넣으세요. 사진은 이 브라우저에서 카드 배경으로 사용됩니다.</div></div>
+<div class="footer-buttons"><button id="addCardButton">카드 추가</button><button id="downloadButton" class="primary">현재 카드 PNG 다운로드</button></div>
+</section>
+<section class="preview">
+<div class="canvas-wrap"><canvas id="cardCanvas" class="card-canvas" width="1080" height="1350"></canvas></div>
+<div class="controls"><div class="row"><button id="previousButton">이전 카드</button><button id="nextButton">다음 카드</button></div><div class="hint">미리보기의 제목이나 본문을 끌어 위치를 조절할 수 있어요. 사진을 붙여넣으려면 페이지를 클릭하고 Ctrl+V를 누르세요.</div></div>
+</section>
+<section class="panel right-panel">
+<div class="field"><label for="titleInput">제목 (번역 후 직접 수정 가능)</label><textarea id="titleInput" placeholder="캡션을 번역하면 제목이 여기에 들어옵니다."></textarea></div>
+<div class="field"><label for="bodyInput">본문 (직접 입력)</label><textarea id="bodyInput" placeholder="카드에 넣을 본문을 직접 입력하세요."></textarea></div>
+<div class="field"><label for="textTarget">크기 조절할 글자</label><select id="textTarget"><option value="title">제목</option><option value="body">본문</option></select></div>
+<div class="field"><label for="fontSize">글자 크기</label><input id="fontSize" type="range" min="24" max="100" value="54"></div>
+<div class="field"><label for="textColor">글자 색</label><input id="textColor" type="color" value="#ffffff"></div>
+<div class="field"><label for="backgroundColor">배경 색</label><input id="backgroundColor" type="color" value="#252235"></div>
+</section>
+</main>
+<script>
+const canvas=document.getElementById('cardCanvas');
+const ctx=canvas.getContext('2d');
+const workerUrlInput=document.getElementById('workerUrl');
+const captionInput=document.getElementById('caption');
+const titleInput=document.getElementById('titleInput');
+const bodyInput=document.getElementById('bodyInput');
+const photoInput=document.getElementById('photoInput');
+const statusBox=document.getElementById('status');
+const textTarget=document.getElementById('textTarget');
+const fontSizeInput=document.getElementById('fontSize');
+const textColorInput=document.getElementById('textColor');
+const backgroundColorInput=document.getElementById('backgroundColor');
+let cards=[newCard()],currentCard=0,backgroundImage=null,dragging=false,dragOffsetX=0,dragOffsetY=0;
+function newCard(){return {title:'',body:'',titleX:540,titleY:470,bodyX:540,bodyY:690,titleSize:58,bodySize:38,textColor:'#ffffff',backgroundColor:'#252235',photo:''}}
+function card(){return cards[currentCard]}
+function saveInputs(){if(!card())return;card().title=titleInput.value;card().body=bodyInput.value;const type=textTarget.value;card()[type+'Size']=Number(fontSizeInput.value);card().textColor=textColorInput.value;card().backgroundColor=backgroundColorInput.value;draw()}
+function loadCard(){const c=card();titleInput.value=c.title;bodyInput.value=c.body;textTarget.value='title';fontSizeInput.value=c.titleSize;textColorInput.value=c.textColor;backgroundColorInput.value=c.backgroundColor;backgroundImage=null;if(c.photo){const img=new Image();img.onload=()=>{if(card()===c){backgroundImage=img;draw()}};img.src=c.photo}draw()}
+function wrapText(text,maxWidth,font){ctx.font=font;const lines=[];for(const paragraph of String(text||'').split('\n')){if(!paragraph){lines.push('');continue}let line='';for(const char of paragraph){const test=line+char;if(line&&ctx.measureText(test).width>maxWidth){lines.push(line);line=char}else line=test}lines.push(line)}return lines}
+function draw(){const c=card();ctx.clearRect(0,0,canvas.width,canvas.height);ctx.fillStyle=c.backgroundColor;ctx.fillRect(0,0,canvas.width,canvas.height);if(backgroundImage){const scale=Math.max(canvas.width/backgroundImage.width,canvas.height/backgroundImage.height);const w=backgroundImage.width*scale,h=backgroundImage.height*scale;ctx.drawImage(backgroundImage,(canvas.width-w)/2,(canvas.height-h)/2,w,h);ctx.fillStyle='rgba(0,0,0,.26)';ctx.fillRect(0,0,canvas.width,canvas.height)}ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillStyle=c.textColor;const titleFont='bold '+c.titleSize+'px Arial';const titleLines=wrapText(c.title,900,titleFont);ctx.font=titleFont;let y=c.titleY-(titleLines.length-1)*c.titleSize*.62;for(const line of titleLines){ctx.fillText(line,c.titleX,y,930);y+=c.titleSize*1.24}const bodyFont='bold '+c.bodySize+'px Arial';const bodyLines=wrapText(c.body,900,bodyFont);ctx.font=bodyFont;y=c.bodyY-(bodyLines.length-1)*c.bodySize*.62;for(const line of bodyLines){ctx.fillText(line,c.bodyX,y,930);y+=c.bodySize*1.24}}
+for(const id of ['titleInput','bodyInput','fontSize','textColor','backgroundColor'])document.getElementById(id).addEventListener('input',saveInputs);
+textTarget.addEventListener('change',()=>{fontSizeInput.value=card()[textTarget.value+'Size']});
+workerUrlInput.value=localStorage.getItem('cardNewsWorkerUrl')||'';
+workerUrlInput.addEventListener('change',()=>localStorage.setItem('cardNewsWorkerUrl',workerUrlInput.value.trim()));
+document.getElementById('translateButton').addEventListener('click',async()=>{const url=workerUrlInput.value.trim(),caption=captionInput.value.trim(),button=document.getElementById('translateButton');if(!url||!caption){statusBox.textContent='연결 주소와 캡션을 먼저 입력해 주세요.';return}button.disabled=true;statusBox.textContent='제목을 번역하고 있어요…';try{const response=await fetch(url,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({caption:caption,targetLanguage:document.getElementById('targetLanguage').value})});const result=await response.json();if(!response.ok)throw new Error(result.error||'요청에 실패했습니다.');const translated=result.cards&&result.cards[0]&&result.cards[0].title;if(!translated)throw new Error(result.error||'번역 결과를 받지 못했습니다.');titleInput.value=translated;saveInputs();statusBox.textContent='번역이 끝났어요. 제목은 직접 수정할 수 있어요.'}catch(error){statusBox.textContent='번역 오류: '+error.message}finally{button.disabled=false}});
+function applyImageFile(file){if(!file||!file.type.startsWith('image/'))return;const reader=new FileReader();reader.onload=()=>{card().photo=reader.result;const image=new Image();image.onload=()=>{backgroundImage=image;draw()};image.src=reader.result;statusBox.textContent='사진을 카드에 넣었어요.'};reader.readAsDataURL(file)}
+photoInput.addEventListener('change',()=>applyImageFile(photoInput.files&&photoInput.files[0]));
+// Windows 캡처 도구(Win+Shift+S)의 클립보드 이미지를 Ctrl+V로 카드 사진에 넣습니다.
+document.addEventListener('paste',event=>{const items=Array.from(event.clipboardData&&event.clipboardData.items||[]);const imageItem=items.find(item=>item.type.startsWith('image/'));if(!imageItem)return;const file=imageItem.getAsFile();if(!file)return;event.preventDefault();applyImageFile(file)});
+function changeCard(index){saveInputs();currentCard=Math.max(0,Math.min(cards.length-1,index));loadCard()}
+document.getElementById('previousButton').addEventListener('click',()=>changeCard(currentCard-1));
+document.getElementById('nextButton').addEventListener('click',()=>changeCard(currentCard+1));
+document.getElementById('addCardButton').addEventListener('click',()=>{saveInputs();cards.push(newCard());currentCard=cards.length-1;loadCard()});
+function canvasPoint(event){const rect=canvas.getBoundingClientRect();return {x:(event.clientX-rect.left)*canvas.width/rect.width,y:(event.clientY-rect.top)*canvas.height/rect.height}}
+canvas.addEventListener('pointerdown',event=>{const p=canvasPoint(event),type=textTarget.value;const x=card()[type+'X'],y=card()[type+'Y'];if(Math.abs(p.x-x)<480&&Math.abs(p.y-y)<180){dragging=true;dragOffsetX=p.x-x;dragOffsetY=p.y-y;canvas.setPointerCapture(event.pointerId)}});
+canvas.addEventListener('pointermove',event=>{if(!dragging)return;const p=canvasPoint(event),type=textTarget.value;card()[type+'X']=Math.max(80,Math.min(1000,p.x-dragOffsetX));card()[type+'Y']=Math.max(40,Math.min(1300,p.y-dragOffsetY));draw()});
+canvas.addEventListener('pointerup',()=>{dragging=false});canvas.addEventListener('pointercancel',()=>{dragging=false});
+document.getElementById('downloadButton').addEventListener('click',()=>{saveInputs();const link=document.createElement('a');link.download='card-news-'+(currentCard+1)+'.png';link.href=canvas.toDataURL('image/png');link.click()});
+loadCard();
+</script>
 </body>
 </html>
