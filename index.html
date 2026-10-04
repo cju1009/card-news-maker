@@ -489,7 +489,49 @@
     canvas.addEventListener("pointercancel", () => {
       dragging = false;
     });
+    let pasteTarget = "sourceImage";
 
+    $("sourceImage").addEventListener("click", () => {
+      pasteTarget = "sourceImage";
+    });
+
+    $("backgroundImage").addEventListener("click", () => {
+      pasteTarget = "backgroundImage";
+    });
+
+    document.addEventListener("paste", (event) => {
+      const items = event.clipboardData?.items;
+      if (!items) return;
+
+      for (const item of items) {
+        if (!item.type.startsWith("image/")) continue;
+
+        event.preventDefault();
+
+        const blob = item.getAsFile();
+        if (!blob) return;
+
+        const pastedFile = new File(
+          [blob],
+          `pasted-image-${Date.now()}.png`,
+          { type: blob.type || "image/png" }
+        );
+
+        const transfer = new DataTransfer();
+        transfer.items.add(pastedFile);
+
+        const input = $(pasteTarget);
+        input.files = transfer.files;
+        input.dispatchEvent(new Event("change", { bubbles: true }));
+
+        $("status").textContent =
+          pasteTarget === "sourceImage"
+            ? "캡처한 사진을 번역용 칸에 붙여 넣었어요."
+            : "캡처한 사진을 배경 사진 칸에 붙여 넣었어요.";
+
+        return;
+      }
+    });
     loadCard();
   </script>
 </body>
