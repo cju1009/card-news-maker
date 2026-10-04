@@ -55,13 +55,8 @@
         <textarea id="translatedTitle" placeholder="먼저 왼쪽에서 사진 속 큰 글씨를 번역하세요."></textarea>
       </div>
       <div class="field">
-        <label for="fontStyle">글자 모양</label>
-        <select id="fontStyle">
-          <option value="instagram">인스타그램 심플</option>
-          <option value="clean">깔끔한 고딕</option>
-          <option value="round">부드러운 고딕</option>
-          <option value="serif">감성 명조</option>
-        </select>
+        <label>글자 모양</label>
+        <div class="help">굵고 선명한 뉴스형 고딕 글씨로 표시됩니다.</div>
       </div>
       <div class="field">
         <label for="fontSize">글자 크기 <span id="fontSizeValue" class="slider-value"></span></label>
@@ -94,13 +89,7 @@
     const $ = (id) => document.getElementById(id);
     const canvas = $("cardCanvas");
     const ctx = canvas.getContext("2d");
-    const cards = [{ title:"", image:null, x:540, y:675, fontSize:72, fontStyle:"instagram", color:"#ffffff", colorRanges:[], gradient:55, fallback:"#242033" }];
-    const fontStyles = {
-      instagram: { weight: 500, family: 'Arial, "Malgun Gothic", "맑은 고딕", sans-serif' },
-      clean: { weight: 600, family: '"Malgun Gothic", "맑은 고딕", Arial, sans-serif' },
-      round: { weight: 500, family: '"Arial Rounded MT Bold", "Malgun Gothic", "맑은 고딕", sans-serif' },
-      serif: { weight: 500, family: '"Batang", "바탕", "Malgun Gothic", serif' }
-    };
+    const cards = [{ title:"", image:null, x:540, y:675, fontSize:72, color:"#ffffff", colorRanges:[], gradient:55, fallback:"#242033" }];
     let current = 0;
     let dragging = false;
     let dragOffset = {x:0,y:0};
@@ -121,7 +110,6 @@
       const newTitle = $("translatedTitle").value;
       if (newTitle !== c.title) c.colorRanges = [];
       c.title = newTitle;
-      c.fontStyle = $("fontStyle").value;
       c.fontSize = Number($("fontSize").value);
       c.color = $("textColor").value;
       c.gradient = Number($("gradientStrength").value);
@@ -131,7 +119,6 @@
     function loadCard() {
       const c = card();
       $("translatedTitle").value = c.title;
-      $("fontStyle").value = c.fontStyle || "instagram";
       $("fontSize").value = c.fontSize;
       $("fontSizeValue").textContent = `${c.fontSize}px`;
       $("textColor").value = c.color;
@@ -205,8 +192,7 @@
         ctx.fillRect(0, 0, canvas.width, canvas.height);
       }
 
-      const style = fontStyles[c.fontStyle] || fontStyles.instagram;
-      ctx.font = `${style.weight} ${c.fontSize}px ${style.family}`;
+      ctx.font = `800 ${c.fontSize}px Arial, "Malgun Gothic", "맑은 고딕", sans-serif`;
       ctx.textBaseline = "middle";
       ctx.textAlign = "left";
       const lines = textLines(title, 900);
@@ -350,7 +336,6 @@
     $("translatedTitle").addEventListener("mouseup", rememberSelection);
     $("translatedTitle").addEventListener("input", () => { saveInputs(); draw(); rememberSelection(); });
     $("fontSize").addEventListener("input", () => { saveInputs(); $("fontSizeValue").textContent = `${$("fontSize").value}px`; draw(); });
-    $("fontStyle").addEventListener("change", () => { saveInputs(); draw(); });
     $("textColor").addEventListener("input", () => { saveInputs(); draw(); });
     $("gradientStrength").addEventListener("input", () => { saveInputs(); $("gradientValue").textContent = `${$("gradientStrength").value}%`; draw(); });
     $("fallbackColor").addEventListener("input", () => { saveInputs(); draw(); });
@@ -372,7 +357,7 @@
     $("addCardButton").addEventListener("click", () => {
       saveInputs();
       const previous = card();
-      cards.push({title:"",image:null,x:540,y:675,fontSize:previous.fontSize,fontStyle:previous.fontStyle,color:previous.color,colorRanges:[],gradient:previous.gradient,fallback:previous.fallback});
+      cards.push({title:"",image:null,x:540,y:675,fontSize:previous.fontSize,color:previous.color,colorRanges:[],gradient:previous.gradient,fallback:previous.fallback});
       current = cards.length-1;
       $("backgroundImage").value = "";
       loadCard();
