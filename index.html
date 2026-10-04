@@ -6,107 +6,35 @@
   <title>카드뉴스 메이커</title>
   <style>
     * { box-sizing: border-box; }
-    body {
-      margin: 0;
-      padding: 18px;
-      color: #f4f4f5;
-      background: #101116;
-      font: 15px Arial, sans-serif;
-    }
-    h1 {
-      max-width: 1200px;
-      margin: 0 auto 16px;
-      font-size: 22px;
-    }
-    .layout {
-      display: grid;
-      grid-template-columns: minmax(270px,330px) minmax(300px,1fr) minmax(270px,330px);
-      gap: 16px;
-      max-width: 1200px;
-      margin: auto;
-      align-items: start;
-    }
-    .panel, .preview {
-      background: #181a22;
-      border: 1px solid #292c36;
-      border-radius: 12px;
-      padding: 16px;
-    }
+    body { margin: 0; padding: 18px; color: #f4f4f5; background: #101116; font: 15px Arial, sans-serif; }
+    h1 { max-width: 1200px; margin: 0 auto 16px; font-size: 22px; }
+    .layout { display: grid; grid-template-columns: minmax(270px,330px) minmax(300px,1fr) minmax(270px,330px); gap: 16px; max-width: 1200px; margin: auto; align-items: start; }
+    .panel, .preview { background: #181a22; border: 1px solid #292c36; border-radius: 12px; padding: 16px; }
     .field { margin-bottom: 13px; }
-    label {
-      display: block;
-      margin: 0 0 7px;
-      color: #d5d6dc;
-      font-size: 13px;
-      font-weight: bold;
-    }
-    input, select, textarea, button {
-      width: 100%;
-      padding: 10px;
-      color: #f4f4f5;
-      background: #111319;
-      border: 1px solid #343743;
-      border-radius: 7px;
-      font: inherit;
-    }
+    label { display: block; margin: 0 0 7px; color: #d5d6dc; font-size: 13px; font-weight: bold; }
+    input, select, textarea, button { width: 100%; padding: 10px; color: #f4f4f5; background: #111319; border: 1px solid #343743; border-radius: 7px; font: inherit; }
     textarea { resize: vertical; min-height: 86px; }
     input[type="file"] { padding: 9px; }
     input[type="color"] { height: 42px; padding: 5px; }
     input[type="range"] { padding: 0; accent-color: #6941f5; }
-    button {
-      border: 0;
-      background: #292c36;
-      font-weight: bold;
-      cursor: pointer;
-    }
+    button { border: 0; background: #292c36; font-weight: bold; cursor: pointer; }
     button.primary { background: #6941f5; }
     button:disabled { opacity: .55; cursor: wait; }
-    .help, .status {
-      font-size: 12px;
-      line-height: 1.5;
-      color: #aeb4c3;
-      margin-top: 6px;
-    }
+    .help, .status { margin-top: 6px; color: #aeb4c3; font-size: 12px; line-height: 1.5; }
     .status { color: #c7b8ff; white-space: pre-wrap; }
     .card-frame { max-width: 390px; margin: auto; }
-    .canvas-wrap {
-      width: 100%;
-      aspect-ratio: 4 / 5;
-      background: #222032;
-      border-radius: 10px;
-      overflow: hidden;
-    }
-    .canvas-wrap canvas {
-      width: 100%;
-      height: 100%;
-      display: block;
-      touch-action: none;
-    }
-    .nav {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 8px;
-      margin-top: 10px;
-    }
+    .canvas-wrap { width: 100%; aspect-ratio: 4 / 5; background: #222032; border-radius: 10px; overflow: hidden; }
+    canvas { display: block; width: 100%; height: 100%; touch-action: none; }
+    .nav, .action, .paste-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    .nav { margin-top: 10px; }
     .nav button { padding: 12px; }
-    .action {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 8px;
-      margin-top: 10px;
-    }
-    .hint {
-      font-size: 12px;
-      line-height: 1.5;
-      color: #aeb4c3;
-      margin-top: 8px;
-    }
-    .slider-value { font-weight: normal; color: #aaa; margin-left: 4px; }
-    .section-title { font-weight: bold; margin: 2px 0 12px; }
-    @media (max-width: 850px) {
-      .layout { grid-template-columns: 1fr; }
-      .card-frame { max-width: min(100%, 390px); }
-    }
+    .action { margin-top: 10px; }
+    .paste-row { margin-top: 6px; }
+    .paste-row button { padding: 8px; color: #ddd; font-size: 12px; }
+    .hint { margin-top: 8px; color: #aeb4c3; font-size: 12px; line-height: 1.5; }
+    .slider-value { margin-left: 4px; color: #aaa; font-weight: normal; }
+    .section-title { margin: 2px 0 12px; font-weight: bold; }
+    @media (max-width: 850px) { .layout { grid-template-columns: 1fr; } .card-frame { max-width: min(100%, 390px); } }
   </style>
 </head>
 <body>
@@ -117,13 +45,17 @@
       <div class="field">
         <label for="workerUrl">AI 연결 주소</label>
         <input id="workerUrl" type="url" placeholder="Cloudflare Worker 주소를 입력하세요">
-        <div class="help">접속 암호가 포함된 주소를 입력하세요. 이 주소를 다른 사람과 공유하지 마세요.</div>
+        <div class="help">접속 암호가 포함된 주소예요. 이 주소를 다른 사람과 공유하지 마세요.</div>
       </div>
 
       <div class="field">
         <label for="sourceImage">① 번역할 문구가 있는 사진</label>
         <input id="sourceImage" type="file" accept="image/*">
-        <div class="help">사진 속 가장 크고 눈에 띄는 제목만 읽어 번역합니다. 이 사진 자체는 카드에 들어가지 않습니다.</div>
+        <div class="paste-row">
+          <button type="button" id="pasteSourceButton">캡처 붙여넣기 대상으로 선택</button>
+          <button type="button" id="clearSourceButton">선택 취소</button>
+        </div>
+        <div class="help">사진 속 큰 제목만 읽어 번역해요. 이 사진 자체는 카드에 들어가지 않습니다.</div>
       </div>
 
       <div class="field">
@@ -147,7 +79,11 @@
       <div class="field">
         <label for="backgroundImage">② 번역된 글씨를 얹을 배경 사진</label>
         <input id="backgroundImage" type="file" accept="image/*">
-        <div class="help">이 사진만 카드 배경으로 사용됩니다. 사진은 브라우저에서 처리되며 번역 요청에 포함되지 않습니다.</div>
+        <div class="paste-row">
+          <button type="button" id="pasteBackgroundButton">캡처 붙여넣기 대상으로 선택</button>
+          <button type="button" id="clearBackgroundButton">선택 취소</button>
+        </div>
+        <div class="help">이 사진만 카드 배경으로 사용돼요. 번역 요청에는 보내지 않습니다.</div>
       </div>
 
       <div class="action">
@@ -158,14 +94,12 @@
 
     <section class="preview">
       <div class="card-frame">
-        <div class="canvas-wrap">
-          <canvas id="cardCanvas" width="1080" height="1350"></canvas>
-        </div>
+        <div class="canvas-wrap"><canvas id="cardCanvas" width="1080" height="1350"></canvas></div>
         <div class="nav">
           <button id="previousButton">이전 카드</button>
           <button id="nextButton">다음 카드</button>
         </div>
-        <div class="hint">번역된 제목은 사진 위에 표시됩니다. 미리보기에서 제목을 끌어 위치를 옮길 수 있어요.</div>
+        <div class="hint">번역 제목은 사진 위에 표시돼요. 미리보기에서 제목을 끌어 위치를 옮길 수 있습니다.</div>
       </div>
     </section>
 
@@ -186,7 +120,7 @@
       <div class="field">
         <label for="gradientStrength">글자 뒤 그라데이션 강도 <span id="gradientValue" class="slider-value">55%</span></label>
         <input id="gradientStrength" type="range" min="0" max="100" value="55">
-        <div class="help">0%는 그라데이션 없음, 100%는 글자 뒤가 가장 어둡게 흐려집니다.</div>
+        <div class="help">0%는 그라데이션 없음, 100%는 글자 뒤가 가장 어둡게 흐려져요.</div>
       </div>
       <div class="field">
         <label for="fallbackColor">사진이 없을 때 배경 색</label>
@@ -209,9 +143,12 @@
       gradient: 55,
       fallback: "#242033"
     }];
+
     let current = 0;
     let dragging = false;
     let dragOffset = { x: 0, y: 0 };
+    let pasteTarget = "sourceImage";
+
     const card = () => cards[current];
 
     $("workerUrl").value = localStorage.getItem("cardNewsWorkerUrl") || "";
@@ -220,7 +157,6 @@
     });
 
     function saveInputs() {
-      if (!card()) return;
       card().title = $("translatedTitle").value;
       card().fontSize = Number($("fontSize").value);
       card().color = $("textColor").value;
@@ -275,13 +211,7 @@
         );
         const w = c.image.width * scale;
         const h = c.image.height * scale;
-        ctx.drawImage(
-          c.image,
-          (canvas.width - w) / 2,
-          (canvas.height - h) / 2,
-          w,
-          h
-        );
+        ctx.drawImage(c.image, (canvas.width - w) / 2, (canvas.height - h) / 2, w, h);
       }
 
       const title = c.title.trim();
@@ -323,17 +253,17 @@
 
     function readImage(file) {
       return new Promise((resolve, reject) => {
-        const url = URL.createObjectURL(file);
+        const objectUrl = URL.createObjectURL(file);
         const img = new Image();
         img.onload = () => {
-          URL.revokeObjectURL(url);
+          URL.revokeObjectURL(objectUrl);
           resolve(img);
         };
         img.onerror = () => {
-          URL.revokeObjectURL(url);
+          URL.revokeObjectURL(objectUrl);
           reject(new Error("사진 파일을 열지 못했습니다."));
         };
-        img.src = url;
+        img.src = objectUrl;
       });
     }
 
@@ -342,7 +272,7 @@
       const workerAddress = $("workerUrl").value.trim();
 
       if (!file) {
-        $("status").textContent = "먼저 번역할 문구가 있는 사진을 선택하세요.";
+        $("status").textContent = "먼저 번역할 문구가 있는 사진을 선택하거나 캡처를 붙여넣으세요.";
         return;
       }
       if (!workerAddress) {
@@ -382,8 +312,7 @@
         saveInputs();
         card().title = result.title;
         loadCard();
-        $("status").textContent =
-          "큰 제목 번역이 끝났어요. 오른쪽에서 문구를 고칠 수 있습니다.";
+        $("status").textContent = "번역이 끝났어요. 오른쪽에서 제목을 수정할 수 있습니다.";
       } catch (error) {
         $("status").textContent = `번역 오류: ${error.message}`;
       } finally {
@@ -394,13 +323,72 @@
     $("backgroundImage").addEventListener("change", async (event) => {
       const file = event.target.files[0];
       if (!file) return;
-
       try {
         saveInputs();
         card().image = await readImage(file);
         draw();
       } catch (error) {
         $("status").textContent = error.message;
+      }
+    });
+
+    $("sourceImage").addEventListener("click", () => {
+      pasteTarget = "sourceImage";
+    });
+    $("backgroundImage").addEventListener("click", () => {
+      pasteTarget = "backgroundImage";
+    });
+
+    $("pasteSourceButton").addEventListener("click", () => {
+      pasteTarget = "sourceImage";
+      $("status").textContent = "번역용 칸을 선택했어요. Win+Shift+S로 캡처한 뒤 Ctrl+V를 누르세요.";
+    });
+    $("pasteBackgroundButton").addEventListener("click", () => {
+      pasteTarget = "backgroundImage";
+      $("status").textContent = "배경 사진 칸을 선택했어요. Win+Shift+S로 캡처한 뒤 Ctrl+V를 누르세요.";
+    });
+
+    $("clearSourceButton").addEventListener("click", () => {
+      $("sourceImage").value = "";
+      $("status").textContent = "번역용 사진 선택을 취소했어요.";
+    });
+    $("clearBackgroundButton").addEventListener("click", () => {
+      $("backgroundImage").value = "";
+      card().image = null;
+      draw();
+      $("status").textContent = "배경 사진을 지웠어요.";
+    });
+
+    document.addEventListener("paste", async (event) => {
+      const items = event.clipboardData?.items;
+      if (!items) return;
+
+      for (const item of items) {
+        if (!item.type.startsWith("image/")) continue;
+        const blob = item.getAsFile();
+        if (!blob) continue;
+
+        event.preventDefault();
+        const file = new File([blob], `pasted-image-${Date.now()}.png`, {
+          type: blob.type || "image/png"
+        });
+
+        if (pasteTarget === "sourceImage") {
+          const transfer = new DataTransfer();
+          transfer.items.add(file);
+          $("sourceImage").files = transfer.files;
+          $("status").textContent = "캡처한 사진을 번역용 칸에 붙여 넣었어요.";
+        } else {
+          try {
+            saveInputs();
+            card().image = await readImage(file);
+            draw();
+            $("status").textContent = "캡처한 사진을 카드 배경으로 붙여 넣었어요.";
+          } catch (error) {
+            $("status").textContent = error.message;
+          }
+        }
+        return;
       }
     });
 
@@ -439,15 +427,16 @@
     });
     $("addCardButton").addEventListener("click", () => {
       saveInputs();
+      const previous = card();
       cards.push({
         title: "",
         image: null,
         x: 540,
         y: 675,
-        fontSize: card().fontSize,
-        color: card().color,
-        gradient: card().gradient,
-        fallback: card().fallback
+        fontSize: previous.fontSize,
+        color: previous.color,
+        gradient: previous.gradient,
+        fallback: previous.fallback
       });
       current = cards.length - 1;
       $("backgroundImage").value = "";
@@ -462,7 +451,7 @@
       link.click();
     });
 
-    function point(event) {
+    function pointerPosition(event) {
       const rect = canvas.getBoundingClientRect();
       return {
         x: (event.clientX - rect.left) * canvas.width / rect.width,
@@ -471,67 +460,21 @@
     }
 
     canvas.addEventListener("pointerdown", (event) => {
-      const p = point(event);
+      const p = pointerPosition(event);
       dragging = true;
       dragOffset = { x: p.x - card().x, y: p.y - card().y };
       canvas.setPointerCapture(event.pointerId);
     });
     canvas.addEventListener("pointermove", (event) => {
       if (!dragging) return;
-      const p = point(event);
+      const p = pointerPosition(event);
       card().x = Math.max(80, Math.min(1000, p.x - dragOffset.x));
       card().y = Math.max(50, Math.min(1300, p.y - dragOffset.y));
       draw();
     });
-    canvas.addEventListener("pointerup", () => {
-      dragging = false;
-    });
-    canvas.addEventListener("pointercancel", () => {
-      dragging = false;
-    });
-    let pasteTarget = "sourceImage";
+    canvas.addEventListener("pointerup", () => { dragging = false; });
+    canvas.addEventListener("pointercancel", () => { dragging = false; });
 
-    $("sourceImage").addEventListener("click", () => {
-      pasteTarget = "sourceImage";
-    });
-
-    $("backgroundImage").addEventListener("click", () => {
-      pasteTarget = "backgroundImage";
-    });
-
-    document.addEventListener("paste", (event) => {
-      const items = event.clipboardData?.items;
-      if (!items) return;
-
-      for (const item of items) {
-        if (!item.type.startsWith("image/")) continue;
-
-        event.preventDefault();
-
-        const blob = item.getAsFile();
-        if (!blob) return;
-
-        const pastedFile = new File(
-          [blob],
-          `pasted-image-${Date.now()}.png`,
-          { type: blob.type || "image/png" }
-        );
-
-        const transfer = new DataTransfer();
-        transfer.items.add(pastedFile);
-
-        const input = $(pasteTarget);
-        input.files = transfer.files;
-        input.dispatchEvent(new Event("change", { bubbles: true }));
-
-        $("status").textContent =
-          pasteTarget === "sourceImage"
-            ? "캡처한 사진을 번역용 칸에 붙여 넣었어요."
-            : "캡처한 사진을 배경 사진 칸에 붙여 넣었어요.";
-
-        return;
-      }
-    });
     loadCard();
   </script>
 </body>
