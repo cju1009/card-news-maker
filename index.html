@@ -20,19 +20,12 @@
       <div class="field">
         <label for="sourceImage">① 번역할 문구가 있는 사진</label>
         <input id="sourceImage" type="file" accept="image/*">
-        <div class="paste-row">
-          <button type="button" id="pasteSourceButton">캡처 붙여넣기 대상으로 선택</button>
-          <button type="button" id="clearSourceButton">선택 취소</button>
-        </div>
+        <div class="paste-row"><button type="button" id="pasteSourceButton">캡처 붙여넣기 대상으로 선택</button><button type="button" id="clearSourceButton">선택 취소</button></div>
         <div class="help">큰 제목만 읽어 자연스럽게 번역합니다. 이 사진은 카드에 들어가지 않아요.</div>
       </div>
       <div class="field">
         <label for="targetLanguage">번역할 언어</label>
-        <select id="targetLanguage">
-          <option>한국어</option><option>영어</option><option>일본어</option>
-          <option>중국어(간체)</option><option>스페인어</option>
-          <option>프랑스어</option><option>독일어</option>
-        </select>
+        <select id="targetLanguage"><option>한국어</option><option>영어</option><option>일본어</option><option>중국어(간체)</option><option>스페인어</option><option>프랑스어</option><option>독일어</option></select>
       </div>
       <div class="field">
         <button id="translateButton" class="primary">사진 속 큰 글씨 번역</button>
@@ -41,27 +34,16 @@
       <div class="field">
         <label for="backgroundImage">② 번역된 글씨를 얹을 배경 사진</label>
         <input id="backgroundImage" type="file" accept="image/*">
-        <div class="paste-row">
-          <button type="button" id="pasteBackgroundButton">캡처 붙여넣기 대상으로 선택</button>
-          <button type="button" id="clearBackgroundButton">선택 취소</button>
-        </div>
+        <div class="paste-row"><button type="button" id="pasteBackgroundButton">캡처 붙여넣기 대상으로 선택</button><button type="button" id="clearBackgroundButton">선택 취소</button></div>
         <div class="help">이 사진만 카드 배경으로 사용됩니다. 번역 요청에는 보내지 않아요.</div>
       </div>
-      <div class="action">
-        <button id="addCardButton">카드 추가</button>
-        <button id="downloadButton" class="primary">현재 카드 PNG 다운로드</button>
-      </div>
+      <div class="action"><button id="addCardButton">카드 추가</button><button id="downloadButton" class="primary">현재 카드 PNG 다운로드</button></div>
     </section>
 
     <section class="preview">
       <div class="card-frame">
-        <div class="canvas-wrap">
-          <canvas id="cardCanvas" width="1080" height="1350"></canvas>
-        </div>
-        <div class="nav">
-          <button id="previousButton">이전 카드</button>
-          <button id="nextButton">다음 카드</button>
-        </div>
+        <div class="canvas-wrap"><canvas id="cardCanvas" width="1080" height="1350"></canvas></div>
+        <div class="nav"><button id="previousButton">이전 카드</button><button id="nextButton">다음 카드</button></div>
         <div class="hint">미리보기에서 제목을 끌어 위치를 옮길 수 있어요.</div>
       </div>
     </section>
@@ -75,10 +57,10 @@
       <div class="field">
         <label for="fontStyle">글자 모양</label>
         <select id="fontStyle">
-          <option value="malgun">굵은 고딕</option>
-          <option value="gulim">굴림체</option>
-          <option value="batang">바탕체</option>
-          <option value="gungsuh">궁서체</option>
+          <option value="instagram">인스타그램 심플</option>
+          <option value="clean">깔끔한 고딕</option>
+          <option value="round">부드러운 고딕</option>
+          <option value="serif">감성 명조</option>
         </select>
       </div>
       <div class="field">
@@ -112,32 +94,26 @@
     const $ = (id) => document.getElementById(id);
     const canvas = $("cardCanvas");
     const ctx = canvas.getContext("2d");
-    const cards = [{
-      title: "", image: null, x: 540, y: 675, fontSize: 72,
-      fontStyle: "malgun", color: "#ffffff", colorRanges: [],
-      gradient: 55, fallback: "#242033"
-    }];
+    const cards = [{ title:"", image:null, x:540, y:675, fontSize:72, fontStyle:"instagram", color:"#ffffff", colorRanges:[], gradient:55, fallback:"#242033" }];
     const fontStyles = {
-      malgun: '"Malgun Gothic", "맑은 고딕", Arial, sans-serif',
-      gulim: 'Gulim, "굴림", sans-serif',
-      batang: 'Batang, "바탕", serif',
-      gungsuh: 'Gungsuh, "궁서", serif'
+      instagram: { weight: 500, family: 'Arial, "Malgun Gothic", "맑은 고딕", sans-serif' },
+      clean: { weight: 600, family: '"Malgun Gothic", "맑은 고딕", Arial, sans-serif' },
+      round: { weight: 500, family: '"Arial Rounded MT Bold", "Malgun Gothic", "맑은 고딕", sans-serif' },
+      serif: { weight: 500, family: '"Batang", "바탕", "Malgun Gothic", serif' }
     };
     let current = 0;
     let dragging = false;
-    let dragOffset = {x: 0, y: 0};
+    let dragOffset = {x:0,y:0};
     let pasteTarget = "sourceImage";
-    let savedSelection = {start: 0, end: 0};
+    let savedSelection = {start:0,end:0};
     const card = () => cards[current];
 
     $("workerUrl").value = localStorage.getItem("cardNewsWorkerUrl") || "";
-    $("workerUrl").addEventListener("input", () =>
-      localStorage.setItem("cardNewsWorkerUrl", $("workerUrl").value)
-    );
+    $("workerUrl").addEventListener("input", () => localStorage.setItem("cardNewsWorkerUrl", $("workerUrl").value));
 
     function rememberSelection() {
       const field = $("translatedTitle");
-      savedSelection = {start: field.selectionStart, end: field.selectionEnd};
+      savedSelection = {start:field.selectionStart, end:field.selectionEnd};
     }
 
     function saveInputs() {
@@ -155,14 +131,14 @@
     function loadCard() {
       const c = card();
       $("translatedTitle").value = c.title;
-      $("fontStyle").value = c.fontStyle || "malgun";
+      $("fontStyle").value = c.fontStyle || "instagram";
       $("fontSize").value = c.fontSize;
       $("fontSizeValue").textContent = `${c.fontSize}px`;
       $("textColor").value = c.color;
       $("gradientStrength").value = c.gradient;
       $("gradientValue").textContent = `${c.gradient}%`;
       $("fallbackColor").value = c.fallback;
-      savedSelection = {start: 0, end: 0};
+      savedSelection = {start:0,end:0};
       draw();
     }
 
@@ -171,7 +147,6 @@
       let line = [];
       let lineText = "";
       let index = 0;
-
       for (const char of text) {
         if (char === "\n") {
           lines.push(line);
@@ -180,19 +155,16 @@
           index += char.length;
           continue;
         }
-
         const candidate = lineText + char;
         if (line.length && ctx.measureText(candidate).width > maxWidth) {
           lines.push(line);
           line = [];
           lineText = "";
         }
-
         line.push({char, index});
         lineText += char;
         index += char.length;
       }
-
       if (line.length || !lines.length) lines.push(line);
       return lines;
     }
@@ -212,10 +184,7 @@
       ctx.fillRect(0, 0, canvas.width, canvas.height);
 
       if (c.image && c.image.complete) {
-        const scale = Math.max(
-          canvas.width / c.image.width,
-          canvas.height / c.image.height
-        );
+        const scale = Math.max(canvas.width / c.image.width, canvas.height / c.image.height);
         const w = c.image.width * scale;
         const h = c.image.height * scale;
         ctx.drawImage(c.image, (canvas.width - w) / 2, (canvas.height - h) / 2, w, h);
@@ -227,12 +196,7 @@
       const strength = c.gradient / 100;
       if (strength > 0) {
         const fadeHeight = 650;
-        const grad = ctx.createLinearGradient(
-          0,
-          Math.max(0, c.y - fadeHeight / 2),
-          0,
-          Math.min(canvas.height, c.y + fadeHeight / 2)
-        );
+        const grad = ctx.createLinearGradient(0, Math.max(0, c.y - fadeHeight / 2), 0, Math.min(canvas.height, c.y + fadeHeight / 2));
         grad.addColorStop(0, "rgba(0,0,0,0)");
         grad.addColorStop(.25, `rgba(0,0,0,${strength * .62})`);
         grad.addColorStop(.72, `rgba(0,0,0,${strength * .9})`);
@@ -241,53 +205,51 @@
         ctx.fillRect(0, 0, canvas.width, canvas.height);
       }
 
-      ctx.font = `bold ${c.fontSize}px ${fontStyles[c.fontStyle] || fontStyles.malgun}`;
+      const style = fontStyles[c.fontStyle] || fontStyles.instagram;
+      ctx.font = `${style.weight} ${c.fontSize}px ${style.family}`;
       ctx.textBaseline = "middle";
+      ctx.textAlign = "left";
       const lines = textLines(title, 900);
       const lineHeight = c.fontSize * 1.28;
       const startY = c.y - (lines.length - 1) * lineHeight / 2;
-      ctx.lineWidth = Math.max(2, c.fontSize / 18);
-      ctx.strokeStyle = "rgba(0,0,0,.5)";
+      ctx.shadowColor = "rgba(0,0,0,.22)";
+      ctx.shadowBlur = 3;
+      ctx.shadowOffsetY = 1;
 
       lines.forEach((line, lineIndex) => {
-        const fullLine = line.map((item) => item.char).join("");
-        let x = c.x - ctx.measureText(fullLine).width / 2;
-        const y = startY + lineIndex * lineHeight;
+        const runs = [];
         let i = 0;
-
-        // 같은 색의 글자끼리 이어서 그려 자간과 글자 모양이 깨지는 것을 줄입니다.
         while (i < line.length) {
           const runColor = colorForIndex(line[i].index, c);
           let runText = line[i].char;
           let j = i + 1;
-
           while (j < line.length && colorForIndex(line[j].index, c) === runColor) {
             runText += line[j].char;
             j++;
           }
-
-          const runWidth = ctx.measureText(runText).width;
-          ctx.fillStyle = runColor;
-          ctx.strokeText(runText, x, y);
-          ctx.fillText(runText, x, y);
-          x += runWidth;
+          runs.push({ text: runText, color: runColor, width: ctx.measureText(runText).width });
           i = j;
         }
+        const totalWidth = runs.reduce((sum, run) => sum + run.width, 0);
+        let x = c.x - totalWidth / 2;
+        const y = startY + lineIndex * lineHeight;
+        for (const run of runs) {
+          ctx.fillStyle = run.color;
+          ctx.fillText(run.text, x, y);
+          x += run.width;
+        }
       });
+      ctx.shadowColor = "transparent";
+      ctx.shadowBlur = 0;
+      ctx.shadowOffsetY = 0;
     }
 
     function readImage(file) {
       return new Promise((resolve, reject) => {
         const objectUrl = URL.createObjectURL(file);
         const img = new Image();
-        img.onload = () => {
-          URL.revokeObjectURL(objectUrl);
-          resolve(img);
-        };
-        img.onerror = () => {
-          URL.revokeObjectURL(objectUrl);
-          reject(new Error("사진 파일을 열지 못했습니다."));
-        };
+        img.onload = () => { URL.revokeObjectURL(objectUrl); resolve(img); };
+        img.onerror = () => { URL.revokeObjectURL(objectUrl); reject(new Error("사진 파일을 열지 못했습니다.")); };
         img.src = objectUrl;
       });
     }
@@ -295,15 +257,8 @@
     $("translateButton").addEventListener("click", async () => {
       const file = $("sourceImage").files[0];
       const workerAddress = $("workerUrl").value.trim();
-
-      if (!file) {
-        $("status").textContent = "번역할 사진을 선택하거나 캡처를 붙여넣으세요.";
-        return;
-      }
-      if (!workerAddress) {
-        $("status").textContent = "Cloudflare Worker 연결 주소를 입력하세요.";
-        return;
-      }
+      if (!file) { $("status").textContent = "번역할 사진을 선택하거나 캡처를 붙여넣으세요."; return; }
+      if (!workerAddress) { $("status").textContent = "Cloudflare Worker 연결 주소를 입력하세요."; return; }
 
       const button = $("translateButton");
       button.disabled = true;
@@ -316,26 +271,19 @@
           reader.onerror = () => reject(new Error("사진을 읽지 못했습니다."));
           reader.readAsDataURL(file);
         });
-
         const response = await fetch(workerAddress, {
           method: "POST",
-          headers: {"Content-Type": "application/json"},
-          body: JSON.stringify({
-            imageDataUri,
-            targetLanguage: $("targetLanguage").value
-          })
+          headers: {"Content-Type":"application/json"},
+          body: JSON.stringify({imageDataUri, targetLanguage:$("targetLanguage").value})
         });
-
         const result = await response.json();
         if (!response.ok) throw new Error(result.error || `요청 오류 (${response.status})`);
         if (!result.title) throw new Error("번역된 제목을 받지 못했습니다.");
-
         saveInputs();
         card().title = result.title;
         card().colorRanges = [];
         loadCard();
-        $("status").textContent =
-          "번역이 끝났어요. 제목을 고치거나 일부 글자색을 바꿔보세요.";
+        $("status").textContent = "번역이 끝났어요. 오른쪽에서 제목을 고치거나 일부 글자색을 바꿔보세요.";
       } catch (error) {
         $("status").textContent = `번역 오류: ${error.message}`;
       } finally {
@@ -346,18 +294,12 @@
     $("backgroundImage").addEventListener("change", async (event) => {
       const file = event.target.files[0];
       if (!file) return;
-      try {
-        saveInputs();
-        card().image = await readImage(file);
-        draw();
-      } catch (error) {
-        $("status").textContent = error.message;
-      }
+      try { saveInputs(); card().image = await readImage(file); draw(); }
+      catch (error) { $("status").textContent = error.message; }
     });
 
     $("sourceImage").addEventListener("click", () => { pasteTarget = "sourceImage"; });
     $("backgroundImage").addEventListener("click", () => { pasteTarget = "backgroundImage"; });
-
     $("pasteSourceButton").addEventListener("click", () => {
       pasteTarget = "sourceImage";
       $("status").textContent = "번역용 칸을 선택했어요. 캡처한 뒤 Ctrl+V를 누르세요.";
@@ -380,19 +322,12 @@
     document.addEventListener("paste", async (event) => {
       const items = event.clipboardData?.items;
       if (!items) return;
-
       for (const item of items) {
         if (!item.type.startsWith("image/")) continue;
         const blob = item.getAsFile();
         if (!blob) continue;
-
         event.preventDefault();
-        const file = new File(
-          [blob],
-          `pasted-image-${Date.now()}.png`,
-          {type: blob.type || "image/png"}
-        );
-
+        const file = new File([blob], `pasted-image-${Date.now()}.png`, {type:blob.type || "image/png"});
         if (pasteTarget === "sourceImage") {
           const transfer = new DataTransfer();
           transfer.items.add(file);
@@ -404,9 +339,7 @@
             card().image = await readImage(file);
             draw();
             $("status").textContent = "캡처한 사진을 카드 배경으로 붙여 넣었어요.";
-          } catch (error) {
-            $("status").textContent = error.message;
-          }
+          } catch (error) { $("status").textContent = error.message; }
         }
         return;
       }
@@ -415,100 +348,58 @@
     $("translatedTitle").addEventListener("select", rememberSelection);
     $("translatedTitle").addEventListener("keyup", rememberSelection);
     $("translatedTitle").addEventListener("mouseup", rememberSelection);
-    $("translatedTitle").addEventListener("input", () => {
-      saveInputs();
-      draw();
-      rememberSelection();
-    });
-    $("fontSize").addEventListener("input", () => {
-      saveInputs();
-      $("fontSizeValue").textContent = `${$("fontSize").value}px`;
-      draw();
-    });
+    $("translatedTitle").addEventListener("input", () => { saveInputs(); draw(); rememberSelection(); });
+    $("fontSize").addEventListener("input", () => { saveInputs(); $("fontSizeValue").textContent = `${$("fontSize").value}px`; draw(); });
     $("fontStyle").addEventListener("change", () => { saveInputs(); draw(); });
     $("textColor").addEventListener("input", () => { saveInputs(); draw(); });
-    $("gradientStrength").addEventListener("input", () => {
-      saveInputs();
-      $("gradientValue").textContent = `${$("gradientStrength").value}%`;
-      draw();
-    });
+    $("gradientStrength").addEventListener("input", () => { saveInputs(); $("gradientValue").textContent = `${$("gradientStrength").value}%`; draw(); });
     $("fallbackColor").addEventListener("input", () => { saveInputs(); draw(); });
 
     $("applySelectedColor").addEventListener("click", () => {
-      const {start, end} = savedSelection;
+      const {start,end} = savedSelection;
       if (start === end) {
-        $("status").textContent =
-          "먼저 제목 입력란에서 색을 바꿀 글자를 드래그해 선택하세요.";
+        $("status").textContent = "먼저 제목 입력란에서 색을 바꿀 글자를 드래그해 선택하세요.";
         return;
       }
-
       saveInputs();
-      card().colorRanges.push({
-        start,
-        end,
-        color: $("selectionColor").value
-      });
+      card().colorRanges.push({start, end, color:$("selectionColor").value});
       draw();
       $("status").textContent = "선택한 글자에만 색을 적용했어요.";
     });
 
-    $("previousButton").addEventListener("click", () => {
-      saveInputs();
-      current = Math.max(0, current - 1);
-      loadCard();
-    });
-    $("nextButton").addEventListener("click", () => {
-      saveInputs();
-      current = Math.min(cards.length - 1, current + 1);
-      loadCard();
-    });
+    $("previousButton").addEventListener("click", () => { saveInputs(); current = Math.max(0,current-1); loadCard(); });
+    $("nextButton").addEventListener("click", () => { saveInputs(); current = Math.min(cards.length-1,current+1); loadCard(); });
     $("addCardButton").addEventListener("click", () => {
       saveInputs();
       const previous = card();
-      cards.push({
-        title: "",
-        image: null,
-        x: 540,
-        y: 675,
-        fontSize: previous.fontSize,
-        fontStyle: previous.fontStyle,
-        color: previous.color,
-        colorRanges: [],
-        gradient: previous.gradient,
-        fallback: previous.fallback
-      });
-      current = cards.length - 1;
+      cards.push({title:"",image:null,x:540,y:675,fontSize:previous.fontSize,fontStyle:previous.fontStyle,color:previous.color,colorRanges:[],gradient:previous.gradient,fallback:previous.fallback});
+      current = cards.length-1;
       $("backgroundImage").value = "";
       loadCard();
     });
-
     $("downloadButton").addEventListener("click", () => {
       draw();
       const link = document.createElement("a");
-      link.download = `card-news-${current + 1}.png`;
+      link.download = `card-news-${current+1}.png`;
       link.href = canvas.toDataURL("image/png");
       link.click();
     });
 
     function pointerPosition(event) {
       const rect = canvas.getBoundingClientRect();
-      return {
-        x: (event.clientX - rect.left) * canvas.width / rect.width,
-        y: (event.clientY - rect.top) * canvas.height / rect.height
-      };
+      return {x:(event.clientX-rect.left)*canvas.width/rect.width,y:(event.clientY-rect.top)*canvas.height/rect.height};
     }
-
     canvas.addEventListener("pointerdown", (event) => {
       const p = pointerPosition(event);
       dragging = true;
-      dragOffset = {x: p.x - card().x, y: p.y - card().y};
+      dragOffset = {x:p.x-card().x,y:p.y-card().y};
       canvas.setPointerCapture(event.pointerId);
     });
     canvas.addEventListener("pointermove", (event) => {
       if (!dragging) return;
       const p = pointerPosition(event);
-      card().x = Math.max(80, Math.min(1000, p.x - dragOffset.x));
-      card().y = Math.max(50, Math.min(1300, p.y - dragOffset.y));
+      card().x = Math.max(80,Math.min(1000,p.x-dragOffset.x));
+      card().y = Math.max(50,Math.min(1300,p.y-dragOffset.y));
       draw();
     });
     canvas.addEventListener("pointerup", () => { dragging = false; });
