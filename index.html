@@ -45,7 +45,7 @@
       <div class="card-frame">
         <div class="canvas-wrap"><canvas id="cardCanvas" width="1080" height="1350"></canvas></div>
         <div class="nav"><button id="previousButton">이전 카드</button><button id="nextButton">다음 카드</button></div>
-        <div class="hint">제목과 아이디는 미리보기에서 끌어 옮길 수 있어요. 아이디는 제목 위쪽에 작게 표시되고 크기도 조절할 수 있어요.</div>
+        <div class="hint">제목과 아이디는 미리보기에서 끌어 옮길 수 있어요. 아래 설정에서 그라데이션 강도와 위로 올라오는 높이를 조절하세요.</div>
       </div>
     </section>
 
@@ -81,23 +81,14 @@
         <div class="help">제목 입력란에서 색을 바꿀 부분을 드래그해 선택한 뒤 색을 고르고 버튼을 누르세요. 다른 글자 색은 유지됩니다.</div>
       </div>
       <div class="field">
-        <label for="gradientStrength">글자 뒤 그라데이션 강도 <span id="gradientValue" class="slider-value">55%</span></label>
-        <input id="gradientStrength" type="range" min="0" max="100" value="55">
-        <div class="help">그라데이션 중심과 퍼지는 범위는 아래에서 글자와 따로 조절할 수 있어요.</div>
+        <label for="gradientStrength">하단 그라데이션 강도 <span id="gradientValue" class="slider-value">65%</span></label>
+        <input id="gradientStrength" type="range" min="0" max="100" value="65">
+        <div class="help">사진 아래쪽을 어둡게 하고 위쪽으로 갈수록 자연스럽게 투명해져요.</div>
       </div>
       <div class="field">
-        <label for="gradientX">그라데이션 중심 가로 <span id="gradientXValue" class="slider-value"></span></label>
-        <input id="gradientX" type="range" min="0" max="1080" value="540">
-      </div>
-      <div class="field">
-        <label for="gradientY">그라데이션 중심 세로 <span id="gradientYValue" class="slider-value"></span></label>
-        <input id="gradientY" type="range" min="0" max="1350" value="900">
-      </div>
-      <div class="field">
-        <label for="gradientRadius">그라데이션 퍼짐 범위 <span id="gradientRadiusValue" class="slider-value"></span></label>
-        <input id="gradientRadius" type="range" min="100" max="1000" value="650">
-        <button type="button" id="pickGradientPosition" class="small-button">미리보기에서 그라데이션 위치 지정</button>
-        <div class="help">버튼을 누른 다음 미리보기에서 어둡게 시작할 곳을 클릭하세요.</div>
+        <label for="gradientHeight">그라데이션 높이 <span id="gradientHeightValue" class="slider-value">45%</span></label>
+        <input id="gradientHeight" type="range" min="10" max="100" value="45">
+        <div class="help">높일수록 어두운 영역이 사진 아래에서 위쪽까지 더 넓게 올라옵니다.</div>
       </div>
       <div class="field">
         <label for="watermarkText">다운로드 아이디</label>
@@ -123,7 +114,7 @@
     const $ = (id) => document.getElementById(id);
     const canvas = $("cardCanvas");
     const ctx = canvas.getContext("2d");
-    const cards = [{ title:"", image:null, x:60, y:270, fontSize:72, fontStyle:"paperlogy-extrabold", color:"#ffffff", colorRanges:[], colorPhrases:[], gradient:55, gradientX:540, gradientY:900, gradientRadius:650, watermark:"@animalnote.daily", watermarkX:60, watermarkY:190, watermarkSize:28, fallback:"#242033" }];
+    const cards = [{ title:"", image:null, x:60, y:270, fontSize:72, fontStyle:"paperlogy-extrabold", color:"#ffffff", colorRanges:[], colorPhrases:[], gradient:65, gradientHeight:45, watermark:"@animalnote.daily", watermarkX:60, watermarkY:190, watermarkSize:28, fallback:"#242033" }];
     const fontStyles = {
       "paperlogy-medium": 500,
       "paperlogy-semibold": 600,
@@ -134,12 +125,19 @@
     let dragging = null;
     let dragOffset = {x:0,y:0};
     let pasteTarget = "sourceImage";
-    let pickingGradientPosition = false;
     let savedSelection = {start:0,end:0};
     const card = () => cards[current];
 
     $("workerUrl").value = localStorage.getItem("cardNewsWorkerUrl") || "";
     $("workerUrl").addEventListener("input", () => localStorage.setItem("cardNewsWorkerUrl", $("workerUrl").value));
+
+    function syncWatermarkToLanguage() {
+      const isJapanese = $("targetLanguage").value === "일본어";
+      $("watermarkText").value = isJapanese ? "@animalnote.daily_jp" : "@animalnote.daily";
+      saveInputs();
+      draw();
+    }
+    $("targetLanguage").addEventListener("change", syncWatermarkToLanguage);
 
     function rememberSelection() {
       const field = $("translatedTitle");
@@ -158,9 +156,7 @@
       c.fontSize = Number($("fontSize").value);
       c.color = $("textColor").value;
       c.gradient = Number($("gradientStrength").value);
-      c.gradientX = Number($("gradientX").value);
-      c.gradientY = Number($("gradientY").value);
-      c.gradientRadius = Number($("gradientRadius").value);
+      c.gradientHeight = Number($("gradientHeight").value);
       c.watermark = $("watermarkText").value;
       c.watermarkSize = Number($("watermarkSize").value);
       c.fallback = $("fallbackColor").value;
@@ -175,12 +171,8 @@
       $("textColor").value = c.color;
       $("gradientStrength").value = c.gradient;
       $("gradientValue").textContent = `${c.gradient}%`;
-      $("gradientX").value = c.gradientX;
-      $("gradientXValue").textContent = c.gradientX;
-      $("gradientY").value = c.gradientY;
-      $("gradientYValue").textContent = c.gradientY;
-      $("gradientRadius").value = c.gradientRadius;
-      $("gradientRadiusValue").textContent = `${c.gradientRadius}px`;
+      $("gradientHeight").value = c.gradientHeight ?? 45;
+      $("gradientHeightValue").textContent = `${c.gradientHeight ?? 45}%`;
       $("watermarkText").value = c.watermark || "";
       $("watermarkSize").value = c.watermarkSize;
       $("watermarkSizeValue").textContent = `${c.watermarkSize}px`;
@@ -240,10 +232,12 @@
       const title = c.title.trim();
       const strength = c.gradient / 100;
       if (strength > 0) {
-        const grad = ctx.createRadialGradient(c.gradientX, c.gradientY, 0, c.gradientX, c.gradientY, c.gradientRadius);
-        grad.addColorStop(0, `rgba(0,0,0,${strength * .78})`);
-        grad.addColorStop(.55, `rgba(0,0,0,${strength * .52})`);
-        grad.addColorStop(1, "rgba(0,0,0,0)");
+        const fadeHeight = canvas.height * ((c.gradientHeight ?? 45) / 100);
+        const fadeStart = canvas.height - fadeHeight;
+        const grad = ctx.createLinearGradient(0, fadeStart, 0, canvas.height);
+        grad.addColorStop(0, "rgba(0,0,0,0)");
+        grad.addColorStop(.36, `rgba(0,0,0,${strength * .28})`);
+        grad.addColorStop(1, `rgba(0,0,0,${strength})`);
         ctx.fillStyle = grad;
         ctx.fillRect(0, 0, canvas.width, canvas.height);
       }
@@ -312,6 +306,7 @@
     $("translateButton").addEventListener("click", async () => {
       const file = $("sourceImage").files[0];
       const workerAddress = $("workerUrl").value.trim();
+      const requestedLanguage = $("targetLanguage").value;
       if (!file) { $("status").textContent = "번역할 사진을 선택하거나 캡처를 붙여넣으세요."; return; }
       if (!workerAddress) { $("status").textContent = "Cloudflare Worker 연결 주소를 입력하세요."; return; }
 
@@ -332,7 +327,7 @@
           headers: {"Content-Type":"application/json"},
           body: JSON.stringify({
             imageDataUri,
-            targetLanguage:$("targetLanguage").value,
+            targetLanguage:requestedLanguage,
             previousTitle:card().title,
             highlightPhrases:card().colorPhrases.map(({id,text}) => ({id,text}))
           })
@@ -343,6 +338,7 @@
         saveInputs();
         const c = card();
         c.title = result.title;
+        c.watermark = requestedLanguage === "일본어" ? "@animalnote.daily_jp" : "@animalnote.daily";
         c.colorRanges = [];
         const remappedPhrases = [];
         for (const phrase of c.colorPhrases) {
@@ -432,13 +428,7 @@
     });
     $("textColor").addEventListener("input", () => { saveInputs(); draw(); });
     $("gradientStrength").addEventListener("input", () => { saveInputs(); $("gradientValue").textContent = `${$("gradientStrength").value}%`; draw(); });
-    $("gradientX").addEventListener("input", () => { saveInputs(); $("gradientXValue").textContent = $("gradientX").value; draw(); });
-    $("gradientY").addEventListener("input", () => { saveInputs(); $("gradientYValue").textContent = $("gradientY").value; draw(); });
-    $("gradientRadius").addEventListener("input", () => { saveInputs(); $("gradientRadiusValue").textContent = `${$("gradientRadius").value}px`; draw(); });
-    $("pickGradientPosition").addEventListener("click", () => {
-      pickingGradientPosition = true;
-      $("status").textContent = "미리보기에서 그라데이션 중심으로 삼을 곳을 클릭하세요.";
-    });
+    $("gradientHeight").addEventListener("input", () => { saveInputs(); $("gradientHeightValue").textContent = `${$("gradientHeight").value}%`; draw(); });
     $("watermarkText").addEventListener("change", () => { saveInputs(); draw(); });
     $("watermarkSize").addEventListener("input", () => { saveInputs(); $("watermarkSizeValue").textContent = `${$("watermarkSize").value}px`; draw(); });
     $("fallbackColor").addEventListener("input", () => { saveInputs(); draw(); });
@@ -464,7 +454,7 @@
     $("addCardButton").addEventListener("click", () => {
       saveInputs();
       const previous = card();
-      cards.push({title:"",image:null,x:60,y:270,fontSize:previous.fontSize,fontStyle:previous.fontStyle,color:previous.color,colorRanges:[],colorPhrases:[],gradient:previous.gradient,gradientX:previous.gradientX,gradientY:previous.gradientY,gradientRadius:previous.gradientRadius,watermark:previous.watermark,watermarkX:previous.watermarkX,watermarkY:previous.watermarkY,watermarkSize:previous.watermarkSize,fallback:previous.fallback});
+      cards.push({title:"",image:null,x:60,y:270,fontSize:previous.fontSize,fontStyle:previous.fontStyle,color:previous.color,colorRanges:[],colorPhrases:[],gradient:previous.gradient,gradientHeight:previous.gradientHeight,watermark:previous.watermark,watermarkX:previous.watermarkX,watermarkY:previous.watermarkY,watermarkSize:previous.watermarkSize,fallback:previous.fallback});
       current = cards.length-1;
       $("backgroundImage").value = "";
       loadCard();
@@ -512,19 +502,6 @@
     canvas.addEventListener("pointerdown", (event) => {
       const p = pointerPosition(event);
       const c = card();
-      if (pickingGradientPosition) {
-        c.gradientX = Math.round(p.x);
-        c.gradientY = Math.round(p.y);
-        $("gradientX").value = c.gradientX;
-        $("gradientXValue").textContent = c.gradientX;
-        $("gradientY").value = c.gradientY;
-        $("gradientYValue").textContent = c.gradientY;
-        pickingGradientPosition = false;
-        saveInputs();
-        draw();
-        $("status").textContent = "그라데이션 위치를 바꿨어요. 퍼짐 범위와 강도도 조절할 수 있어요.";
-        return;
-      }
       if (c.watermark) {
         ctx.font = `500 ${c.watermarkSize}px "Paperlogy", "Malgun Gothic", "맑은 고딕", sans-serif`;
         const watermarkWidth = ctx.measureText(c.watermark).width;
