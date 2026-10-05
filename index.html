@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>카드뉴스 메이커</title>
   <style>
-    *{box-sizing:border-box}body{margin:0;padding:18px;color:#f4f4f5;background:#101116;font:15px Arial,sans-serif}h1{max-width:1200px;margin:0 auto 16px;font-size:22px}.layout{display:grid;grid-template-columns:minmax(270px,330px) minmax(300px,1fr) minmax(270px,330px);gap:16px;max-width:1200px;margin:auto;align-items:start}.panel,.preview{background:#181a22;border:1px solid #292c36;border-radius:12px;padding:16px}.field{margin-bottom:13px}label{display:block;margin:0 0 7px;color:#d5d6dc;font-size:13px;font-weight:bold}input,select,textarea,button{width:100%;padding:10px;color:#f4f4f5;background:#111319;border:1px solid #343743;border-radius:7px;font:inherit}textarea{resize:vertical;min-height:86px}input[type=file]{padding:9px}input[type=color]{height:42px;padding:5px}input[type=range]{padding:0;accent-color:#6941f5}button{border:0;background:#292c36;font-weight:bold;cursor:pointer}button.primary{background:#6941f5}button:disabled{opacity:.55;cursor:wait}.help,.status{margin-top:6px;color:#aeb4c3;font-size:12px;line-height:1.5}.status{color:#c7b8ff;white-space:pre-wrap}.card-frame{max-width:390px;margin:auto}.canvas-wrap{width:100%;aspect-ratio:4/5;background:#222032;border-radius:10px;overflow:hidden}.canvas-wrap canvas{width:100%;height:100%;display:block;touch-action:none}.nav,.action,.paste-row{display:grid;grid-template-columns:1fr 1fr;gap:8px}.nav{margin-top:10px}.nav button{padding:12px}.action{margin-top:10px}.paste-row{margin-top:6px}.paste-row button{padding:8px;color:#ddd;font-size:12px}.hint{margin-top:8px;color:#aeb4c3;font-size:12px;line-height:1.5}.slider-value{margin-left:4px;color:#aaa;font-weight:normal}.section-title{margin:2px 0 12px;font-weight:bold}.small-button{margin-top:7px;padding:9px;font-size:13px}@media(max-width:850px){.layout{grid-template-columns:1fr}.card-frame{max-width:min(100%,390px)}}
+    *{box-sizing:border-box}body{margin:0;padding:18px;color:#f4f4f5;background:#101116;font:15px Arial,sans-serif}h1{max-width:1200px;margin:0 auto 16px;font-size:22px}.layout{display:grid;grid-template-columns:minmax(270px,330px) minmax(300px,1fr) minmax(270px,330px);gap:16px;max-width:1200px;margin:auto;align-items:start}.panel,.preview{background:#181a22;border:1px solid #292c36;border-radius:12px;padding:16px}.field{margin-bottom:13px}label{display:block;margin:0 0 7px;color:#d5d6dc;font-size:13px;font-weight:bold}input,select,textarea,button{width:100%;padding:10px;color:#f4f4f5;background:#111319;border:1px solid #343743;border-radius:7px;font:inherit}textarea{resize:vertical;min-height:86px}input[type=file]{padding:9px}input[type=color]{height:42px;padding:5px}input[type=range]{padding:0;accent-color:#6941f5}button{border:0;background:#292c36;font-weight:bold;cursor:pointer}button.primary{background:#6941f5}button:disabled{opacity:.55;cursor:wait}.help,.status{margin-top:6px;color:#aeb4c3;font-size:12px;line-height:1.5}.status{color:#c7b8ff;white-space:pre-wrap}.card-frame{max-width:390px;margin:auto}.canvas-wrap{width:100%;aspect-ratio:4/5;background:#222032;border-radius:10px;overflow:hidden}.canvas-wrap canvas{width:100%;height:100%;display:block;touch-action:none}.nav,.action,.paste-row{display:grid;grid-template-columns:1fr 1fr;gap:8px}.nav{margin-top:10px}.nav button{padding:12px}.action{margin-top:10px}.action button:last-child{grid-column:1/-1}.paste-row{margin-top:6px}.paste-row button{padding:8px;color:#ddd;font-size:12px}.hint{margin-top:8px;color:#aeb4c3;font-size:12px;line-height:1.5}.slider-value{margin-left:4px;color:#aaa;font-weight:normal}.section-title{margin:2px 0 12px;font-weight:bold}.small-button{margin-top:7px;padding:9px;font-size:13px}@media(max-width:850px){.layout{grid-template-columns:1fr}.card-frame{max-width:min(100%,390px)}}
   </style>
 </head>
 <body>
@@ -37,7 +37,11 @@
         <div class="paste-row"><button type="button" id="pasteBackgroundButton">캡처 붙여넣기 대상으로 선택</button><button type="button" id="clearBackgroundButton">선택 취소</button></div>
         <div class="help">이 사진만 카드 배경으로 사용됩니다. 번역 요청에는 보내지 않아요.</div>
       </div>
-      <div class="action"><button id="addCardButton">카드 추가</button><button id="downloadButton" class="primary">현재 카드 PNG 다운로드</button></div>
+      <div class="action">
+        <button id="addCardButton">카드 추가</button>
+        <button id="downloadButton" class="primary">현재 카드 PNG 다운로드</button>
+        <button id="shareButton" class="primary">카카오톡 공유하기</button>
+      </div>
     </section>
 
     <section class="preview">
@@ -89,7 +93,7 @@
     const $ = (id) => document.getElementById(id);
     const canvas = $("cardCanvas");
     const ctx = canvas.getContext("2d");
-    const cards = [{ title:"", image:null, x:540, y:675, fontSize:72, color:"#ffffff", colorRanges:[], gradient:55, fallback:"#242033" }];
+    const cards = [{ title:"", image:null, x:60, y:270, fontSize:72, color:"#ffffff", colorRanges:[], gradient:55, fallback:"#242033" }];
     let current = 0;
     let dragging = false;
     let dragOffset = {x:0,y:0};
@@ -216,8 +220,7 @@
           runs.push({ text: runText, color: runColor, width: ctx.measureText(runText).width });
           i = j;
         }
-        const totalWidth = runs.reduce((sum, run) => sum + run.width, 0);
-        let x = c.x - totalWidth / 2;
+        let x = c.x;
         const y = startY + lineIndex * lineHeight;
         for (const run of runs) {
           ctx.fillStyle = run.color;
@@ -357,7 +360,7 @@
     $("addCardButton").addEventListener("click", () => {
       saveInputs();
       const previous = card();
-      cards.push({title:"",image:null,x:540,y:675,fontSize:previous.fontSize,color:previous.color,colorRanges:[],gradient:previous.gradient,fallback:previous.fallback});
+      cards.push({title:"",image:null,x:60,y:270,fontSize:previous.fontSize,color:previous.color,colorRanges:[],gradient:previous.gradient,fallback:previous.fallback});
       current = cards.length-1;
       $("backgroundImage").value = "";
       loadCard();
@@ -368,6 +371,34 @@
       link.download = `card-news-${current+1}.png`;
       link.href = canvas.toDataURL("image/png");
       link.click();
+    });
+
+    $("shareButton").addEventListener("click", async () => {
+      draw();
+      const button = $("shareButton");
+      button.disabled = true;
+      try {
+        const blob = await new Promise((resolve, reject) => {
+          canvas.toBlob((result) => result ? resolve(result) : reject(new Error("PNG 이미지를 만들지 못했습니다.")), "image/png");
+        });
+        const file = new File([blob], `card-news-${current+1}.png`, {type:"image/png"});
+
+        if (navigator.canShare && navigator.canShare({files:[file]}) && navigator.share) {
+          await navigator.share({files:[file], title:"카드뉴스 이미지"});
+          $("status").textContent = "공유 창에서 카카오톡을 골라 보내세요. 원본 화질을 유지하려면 카카오톡에서 가능하면 파일로 보내세요.";
+        } else {
+          const link = document.createElement("a");
+          link.download = file.name;
+          link.href = URL.createObjectURL(blob);
+          link.click();
+          setTimeout(() => URL.revokeObjectURL(link.href), 1000);
+          $("status").textContent = "이 브라우저에서는 바로 공유할 수 없어 PNG를 다운로드했어요. 카카오톡 나와의 채팅에서 파일로 첨부해 보내세요.";
+        }
+      } catch (error) {
+        if (error.name !== "AbortError") $("status").textContent = `공유 오류: ${error.message}`;
+      } finally {
+        button.disabled = false;
+      }
     });
 
     function pointerPosition(event) {
@@ -383,7 +414,7 @@
     canvas.addEventListener("pointermove", (event) => {
       if (!dragging) return;
       const p = pointerPosition(event);
-      card().x = Math.max(80,Math.min(1000,p.x-dragOffset.x));
+      card().x = Math.max(40,Math.min(850,p.x-dragOffset.x));
       card().y = Math.max(50,Math.min(1300,p.y-dragOffset.y));
       draw();
     });
