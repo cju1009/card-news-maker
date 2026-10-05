@@ -3,9 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=Do+Hyeon&family=Noto+Sans+KR:wght@800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/fonts-archive/Paperlogy/subsets/Paperlogy-dynamic-subset.css">
   <title>카드뉴스 메이커</title>
   <style>
     *{box-sizing:border-box}body{margin:0;padding:18px;color:#f4f4f5;background:#101116;font:15px Arial,sans-serif}h1{max-width:1200px;margin:0 auto 16px;font-size:22px}.layout{display:grid;grid-template-columns:minmax(270px,330px) minmax(300px,1fr) minmax(270px,330px);gap:16px;max-width:1200px;margin:auto;align-items:start}.panel,.preview{background:#181a22;border:1px solid #292c36;border-radius:12px;padding:16px}.field{margin-bottom:13px}label{display:block;margin:0 0 7px;color:#d5d6dc;font-size:13px;font-weight:bold}input,select,textarea,button{width:100%;padding:10px;color:#f4f4f5;background:#111319;border:1px solid #343743;border-radius:7px;font:inherit}textarea{resize:vertical;min-height:86px}input[type=file]{padding:9px}input[type=color]{height:42px;padding:5px}input[type=range]{padding:0;accent-color:#6941f5}button{border:0;background:#292c36;font-weight:bold;cursor:pointer}button.primary{background:#6941f5}button:disabled{opacity:.55;cursor:wait}.help,.status{margin-top:6px;color:#aeb4c3;font-size:12px;line-height:1.5}.status{color:#c7b8ff;white-space:pre-wrap}.card-frame{max-width:390px;margin:auto}.canvas-wrap{width:100%;aspect-ratio:4/5;background:#222032;border-radius:10px;overflow:hidden}.canvas-wrap canvas{width:100%;height:100%;display:block;touch-action:none}.nav,.action,.paste-row{display:grid;grid-template-columns:1fr 1fr;gap:8px}.nav{margin-top:10px}.nav button{padding:12px}.action{margin-top:10px}.action button:last-child{grid-column:1/-1}.paste-row{margin-top:6px}.paste-row button{padding:8px;color:#ddd;font-size:12px}.hint{margin-top:8px;color:#aeb4c3;font-size:12px;line-height:1.5}.slider-value{margin-left:4px;color:#aaa;font-weight:normal}.section-title{margin:2px 0 12px;font-weight:bold}.small-button{margin-top:7px;padding:9px;font-size:13px}@media(max-width:850px){.layout{grid-template-columns:1fr}.card-frame{max-width:min(100%,390px)}}
@@ -47,7 +45,7 @@
       <div class="card-frame">
         <div class="canvas-wrap"><canvas id="cardCanvas" width="1080" height="1350"></canvas></div>
         <div class="nav"><button id="previousButton">이전 카드</button><button id="nextButton">다음 카드</button></div>
-        <div class="hint">미리보기에서 제목을 끌어 위치를 옮길 수 있어요.</div>
+        <div class="hint">제목과 아이디는 미리보기에서 끌어 옮길 수 있어요. 아이디는 제목 위쪽에 작게 표시되고 크기도 조절할 수 있어요.</div>
       </div>
     </section>
 
@@ -60,10 +58,10 @@
       <div class="field">
         <label>글자 모양</label>
         <select id="fontStyle">
-          <option value="news">굵은 뉴스 고딕</option>
-          <option value="blackHan">블랙 한 산스 (굵고 꽉 찬 글씨)</option>
-          <option value="doHyeon">도현체 (압축형 제목 글씨)</option>
-          <option value="notoBlack">Noto Sans KR 블랙</option>
+          <option value="paperlogy-medium">페이퍼로지 Medium</option>
+          <option value="paperlogy-semibold">페이퍼로지 Semi Bold</option>
+          <option value="paperlogy-bold">페이퍼로지 Bold</option>
+          <option value="paperlogy-extrabold">페이퍼로지 Extra Bold</option>
         </select>
         <div class="help">보내주신 예시처럼 굵고 선명한 제목 글씨를 고를 수 있어요.</div>
       </div>
@@ -85,7 +83,34 @@
       <div class="field">
         <label for="gradientStrength">글자 뒤 그라데이션 강도 <span id="gradientValue" class="slider-value">55%</span></label>
         <input id="gradientStrength" type="range" min="0" max="100" value="55">
-        <div class="help">0%는 그라데이션 없음, 100%는 글자 뒤가 가장 어둡게 흐려져요.</div>
+        <div class="help">그라데이션 중심과 퍼지는 범위는 아래에서 글자와 따로 조절할 수 있어요.</div>
+      </div>
+      <div class="field">
+        <label for="gradientX">그라데이션 중심 가로 <span id="gradientXValue" class="slider-value"></span></label>
+        <input id="gradientX" type="range" min="0" max="1080" value="540">
+      </div>
+      <div class="field">
+        <label for="gradientY">그라데이션 중심 세로 <span id="gradientYValue" class="slider-value"></span></label>
+        <input id="gradientY" type="range" min="0" max="1350" value="900">
+      </div>
+      <div class="field">
+        <label for="gradientRadius">그라데이션 퍼짐 범위 <span id="gradientRadiusValue" class="slider-value"></span></label>
+        <input id="gradientRadius" type="range" min="100" max="1000" value="650">
+        <button type="button" id="pickGradientPosition" class="small-button">미리보기에서 그라데이션 위치 지정</button>
+        <div class="help">버튼을 누른 다음 미리보기에서 어둡게 시작할 곳을 클릭하세요.</div>
+      </div>
+      <div class="field">
+        <label for="watermarkText">다운로드 아이디</label>
+        <select id="watermarkText">
+          <option value="@animalnote.daily">@animalnote.daily</option>
+          <option value="@animalnote.daily_jp">@animalnote.daily_jp</option>
+          <option value="">아이디 표시 안 함</option>
+        </select>
+        <div class="help">미리보기에서 아이디를 끌어 위치를 바꿀 수 있어요.</div>
+      </div>
+      <div class="field">
+        <label for="watermarkSize">아이디 크기 <span id="watermarkSizeValue" class="slider-value"></span></label>
+        <input id="watermarkSize" type="range" min="16" max="60" value="28">
       </div>
       <div class="field">
         <label for="fallbackColor">사진이 없을 때 배경 색</label>
@@ -98,17 +123,18 @@
     const $ = (id) => document.getElementById(id);
     const canvas = $("cardCanvas");
     const ctx = canvas.getContext("2d");
-    const cards = [{ title:"", image:null, x:60, y:270, fontSize:72, fontStyle:"blackHan", color:"#ffffff", colorRanges:[], colorPhrases:[], gradient:55, fallback:"#242033" }];
+    const cards = [{ title:"", image:null, x:60, y:270, fontSize:72, fontStyle:"paperlogy-extrabold", color:"#ffffff", colorRanges:[], colorPhrases:[], gradient:55, gradientX:540, gradientY:900, gradientRadius:650, watermark:"@animalnote.daily", watermarkX:60, watermarkY:190, watermarkSize:28, fallback:"#242033" }];
     const fontStyles = {
-      news: { weight: 800, family: 'Arial, "Malgun Gothic", "맑은 고딕", sans-serif' },
-      blackHan: { weight: 400, family: '"Black Han Sans", "Malgun Gothic", "맑은 고딕", sans-serif' },
-      doHyeon: { weight: 400, family: '"Do Hyeon", "Malgun Gothic", "맑은 고딕", sans-serif' },
-      notoBlack: { weight: 900, family: '"Noto Sans KR", "Malgun Gothic", "맑은 고딕", sans-serif' }
+      "paperlogy-medium": 500,
+      "paperlogy-semibold": 600,
+      "paperlogy-bold": 700,
+      "paperlogy-extrabold": 800
     };
     let current = 0;
-    let dragging = false;
+    let dragging = null;
     let dragOffset = {x:0,y:0};
     let pasteTarget = "sourceImage";
+    let pickingGradientPosition = false;
     let savedSelection = {start:0,end:0};
     const card = () => cards[current];
 
@@ -132,18 +158,32 @@
       c.fontSize = Number($("fontSize").value);
       c.color = $("textColor").value;
       c.gradient = Number($("gradientStrength").value);
+      c.gradientX = Number($("gradientX").value);
+      c.gradientY = Number($("gradientY").value);
+      c.gradientRadius = Number($("gradientRadius").value);
+      c.watermark = $("watermarkText").value;
+      c.watermarkSize = Number($("watermarkSize").value);
       c.fallback = $("fallbackColor").value;
     }
 
     function loadCard() {
       const c = card();
       $("translatedTitle").value = c.title;
-      $("fontStyle").value = c.fontStyle || "blackHan";
+      $("fontStyle").value = c.fontStyle || "paperlogy-extrabold";
       $("fontSize").value = c.fontSize;
       $("fontSizeValue").textContent = `${c.fontSize}px`;
       $("textColor").value = c.color;
       $("gradientStrength").value = c.gradient;
       $("gradientValue").textContent = `${c.gradient}%`;
+      $("gradientX").value = c.gradientX;
+      $("gradientXValue").textContent = c.gradientX;
+      $("gradientY").value = c.gradientY;
+      $("gradientYValue").textContent = c.gradientY;
+      $("gradientRadius").value = c.gradientRadius;
+      $("gradientRadiusValue").textContent = `${c.gradientRadius}px`;
+      $("watermarkText").value = c.watermark || "";
+      $("watermarkSize").value = c.watermarkSize;
+      $("watermarkSizeValue").textContent = `${c.watermarkSize}px`;
       $("fallbackColor").value = c.fallback;
       savedSelection = {start:0,end:0};
       draw();
@@ -198,53 +238,62 @@
       }
 
       const title = c.title.trim();
-      if (!title) return;
-
       const strength = c.gradient / 100;
       if (strength > 0) {
-        const fadeHeight = 650;
-        const grad = ctx.createLinearGradient(0, Math.max(0, c.y - fadeHeight / 2), 0, Math.min(canvas.height, c.y + fadeHeight / 2));
-        grad.addColorStop(0, "rgba(0,0,0,0)");
-        grad.addColorStop(.25, `rgba(0,0,0,${strength * .62})`);
-        grad.addColorStop(.72, `rgba(0,0,0,${strength * .9})`);
-        grad.addColorStop(1, `rgba(0,0,0,${strength * .55})`);
+        const grad = ctx.createRadialGradient(c.gradientX, c.gradientY, 0, c.gradientX, c.gradientY, c.gradientRadius);
+        grad.addColorStop(0, `rgba(0,0,0,${strength * .78})`);
+        grad.addColorStop(.55, `rgba(0,0,0,${strength * .52})`);
+        grad.addColorStop(1, "rgba(0,0,0,0)");
         ctx.fillStyle = grad;
         ctx.fillRect(0, 0, canvas.width, canvas.height);
       }
 
-      const font = fontStyles[c.fontStyle] || fontStyles.blackHan;
-      ctx.font = `${font.weight} ${c.fontSize}px ${font.family}`;
-      ctx.textBaseline = "middle";
-      ctx.textAlign = "left";
-      const lines = textLines(title, 900);
-      const lineHeight = c.fontSize * 1.28;
-      const startY = c.y - (lines.length - 1) * lineHeight / 2;
-      ctx.shadowColor = "rgba(0,0,0,.22)";
-      ctx.shadowBlur = 3;
-      ctx.shadowOffsetY = 1;
+      if (title) {
+        const weight = fontStyles[c.fontStyle] || 800;
+        ctx.font = `${weight} ${c.fontSize}px "Paperlogy", "Malgun Gothic", "맑은 고딕", sans-serif`;
+        ctx.textBaseline = "middle";
+        ctx.textAlign = "left";
+        const lines = textLines(title, 900);
+        const lineHeight = c.fontSize * 1.28;
+        const startY = c.y - (lines.length - 1) * lineHeight / 2;
+        ctx.shadowColor = "rgba(0,0,0,.28)";
+        ctx.shadowBlur = 3;
+        ctx.shadowOffsetY = 1;
 
-      lines.forEach((line, lineIndex) => {
-        const runs = [];
-        let i = 0;
-        while (i < line.length) {
-          const runColor = colorForIndex(line[i].index, c);
-          let runText = line[i].char;
-          let j = i + 1;
-          while (j < line.length && colorForIndex(line[j].index, c) === runColor) {
-            runText += line[j].char;
-            j++;
+        lines.forEach((line, lineIndex) => {
+          const runs = [];
+          let i = 0;
+          while (i < line.length) {
+            const runColor = colorForIndex(line[i].index, c);
+            let runText = line[i].char;
+            let j = i + 1;
+            while (j < line.length && colorForIndex(line[j].index, c) === runColor) {
+              runText += line[j].char;
+              j++;
+            }
+            runs.push({ text: runText, color: runColor, width: ctx.measureText(runText).width });
+            i = j;
           }
-          runs.push({ text: runText, color: runColor, width: ctx.measureText(runText).width });
-          i = j;
-        }
-        let x = c.x;
-        const y = startY + lineIndex * lineHeight;
-        for (const run of runs) {
-          ctx.fillStyle = run.color;
-          ctx.fillText(run.text, x, y);
-          x += run.width;
-        }
-      });
+          let x = c.x;
+          const y = startY + lineIndex * lineHeight;
+          for (const run of runs) {
+            ctx.fillStyle = run.color;
+            ctx.fillText(run.text, x, y);
+            x += run.width;
+          }
+        });
+      }
+
+      if (c.watermark) {
+        ctx.font = `500 ${c.watermarkSize}px "Paperlogy", "Malgun Gothic", "맑은 고딕", sans-serif`;
+        ctx.textAlign = "left";
+        ctx.textBaseline = "middle";
+        ctx.fillStyle = "#ffffff";
+        ctx.shadowColor = "rgba(0,0,0,.65)";
+        ctx.shadowBlur = 4;
+        ctx.shadowOffsetY = 1;
+        ctx.fillText(c.watermark, c.watermarkX, c.watermarkY);
+      }
       ctx.shadowColor = "transparent";
       ctx.shadowBlur = 0;
       ctx.shadowOffsetY = 0;
@@ -377,12 +426,21 @@
     $("fontSize").addEventListener("input", () => { saveInputs(); $("fontSizeValue").textContent = `${$("fontSize").value}px`; draw(); });
     $("fontStyle").addEventListener("change", async () => {
       saveInputs();
-      const font = fontStyles[$("fontStyle").value] || fontStyles.blackHan;
-      try { await document.fonts.load(`${font.weight} 72px ${font.family}`, "카드뉴스 제목"); } catch {}
+      const weight = fontStyles[$("fontStyle").value] || 800;
+      try { await document.fonts.load(`${weight} 72px "Paperlogy"`, "카드뉴스 제목"); } catch {}
       draw();
     });
     $("textColor").addEventListener("input", () => { saveInputs(); draw(); });
     $("gradientStrength").addEventListener("input", () => { saveInputs(); $("gradientValue").textContent = `${$("gradientStrength").value}%`; draw(); });
+    $("gradientX").addEventListener("input", () => { saveInputs(); $("gradientXValue").textContent = $("gradientX").value; draw(); });
+    $("gradientY").addEventListener("input", () => { saveInputs(); $("gradientYValue").textContent = $("gradientY").value; draw(); });
+    $("gradientRadius").addEventListener("input", () => { saveInputs(); $("gradientRadiusValue").textContent = `${$("gradientRadius").value}px`; draw(); });
+    $("pickGradientPosition").addEventListener("click", () => {
+      pickingGradientPosition = true;
+      $("status").textContent = "미리보기에서 그라데이션 중심으로 삼을 곳을 클릭하세요.";
+    });
+    $("watermarkText").addEventListener("change", () => { saveInputs(); draw(); });
+    $("watermarkSize").addEventListener("input", () => { saveInputs(); $("watermarkSizeValue").textContent = `${$("watermarkSize").value}px`; draw(); });
     $("fallbackColor").addEventListener("input", () => { saveInputs(); draw(); });
 
     $("applySelectedColor").addEventListener("click", () => {
@@ -406,7 +464,7 @@
     $("addCardButton").addEventListener("click", () => {
       saveInputs();
       const previous = card();
-      cards.push({title:"",image:null,x:60,y:270,fontSize:previous.fontSize,fontStyle:previous.fontStyle,color:previous.color,colorRanges:[],colorPhrases:[],gradient:previous.gradient,fallback:previous.fallback});
+      cards.push({title:"",image:null,x:60,y:270,fontSize:previous.fontSize,fontStyle:previous.fontStyle,color:previous.color,colorRanges:[],colorPhrases:[],gradient:previous.gradient,gradientX:previous.gradientX,gradientY:previous.gradientY,gradientRadius:previous.gradientRadius,watermark:previous.watermark,watermarkX:previous.watermarkX,watermarkY:previous.watermarkY,watermarkSize:previous.watermarkSize,fallback:previous.fallback});
       current = cards.length-1;
       $("backgroundImage").value = "";
       loadCard();
@@ -453,22 +511,59 @@
     }
     canvas.addEventListener("pointerdown", (event) => {
       const p = pointerPosition(event);
-      dragging = true;
-      dragOffset = {x:p.x-card().x,y:p.y-card().y};
+      const c = card();
+      if (pickingGradientPosition) {
+        c.gradientX = Math.round(p.x);
+        c.gradientY = Math.round(p.y);
+        $("gradientX").value = c.gradientX;
+        $("gradientXValue").textContent = c.gradientX;
+        $("gradientY").value = c.gradientY;
+        $("gradientYValue").textContent = c.gradientY;
+        pickingGradientPosition = false;
+        saveInputs();
+        draw();
+        $("status").textContent = "그라데이션 위치를 바꿨어요. 퍼짐 범위와 강도도 조절할 수 있어요.";
+        return;
+      }
+      if (c.watermark) {
+        ctx.font = `500 ${c.watermarkSize}px "Paperlogy", "Malgun Gothic", "맑은 고딕", sans-serif`;
+        const watermarkWidth = ctx.measureText(c.watermark).width;
+        const withinWatermark =
+          p.x >= c.watermarkX - 12 &&
+          p.x <= c.watermarkX + watermarkWidth + 12 &&
+          p.y >= c.watermarkY - c.watermarkSize &&
+          p.y <= c.watermarkY + c.watermarkSize;
+        if (withinWatermark) {
+          dragging = "watermark";
+          dragOffset = {x:p.x-c.watermarkX,y:p.y-c.watermarkY};
+        }
+      }
+      if (!dragging) {
+        dragging = "title";
+        dragOffset = {x:p.x-c.x,y:p.y-c.y};
+      }
       canvas.setPointerCapture(event.pointerId);
     });
     canvas.addEventListener("pointermove", (event) => {
       if (!dragging) return;
       const p = pointerPosition(event);
-      card().x = Math.max(40,Math.min(850,p.x-dragOffset.x));
-      card().y = Math.max(50,Math.min(1300,p.y-dragOffset.y));
+      if (dragging === "watermark") {
+        const c = card();
+        ctx.font = `500 ${c.watermarkSize}px "Paperlogy", "Malgun Gothic", "맑은 고딕", sans-serif`;
+        const watermarkWidth = ctx.measureText(c.watermark).width;
+        c.watermarkX = Math.max(12, Math.min(canvas.width - watermarkWidth - 12, p.x - dragOffset.x));
+        c.watermarkY = Math.max(c.watermarkSize, Math.min(canvas.height - c.watermarkSize, p.y - dragOffset.y));
+      } else {
+        card().x = Math.max(40,Math.min(850,p.x-dragOffset.x));
+        card().y = Math.max(50,Math.min(1300,p.y-dragOffset.y));
+      }
       draw();
     });
-    canvas.addEventListener("pointerup", () => { dragging = false; });
-    canvas.addEventListener("pointercancel", () => { dragging = false; });
+    canvas.addEventListener("pointerup", () => { dragging = null; });
+    canvas.addEventListener("pointercancel", () => { dragging = null; });
 
     loadCard();
-    document.fonts.load('400 72px "Black Han Sans"', "카드뉴스 제목")
+    document.fonts.load('800 72px "Paperlogy"', "카드뉴스 제목")
       .then(() => draw())
       .catch(() => draw());
   </script>
