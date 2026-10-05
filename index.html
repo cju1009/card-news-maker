@@ -93,7 +93,7 @@
     const $ = (id) => document.getElementById(id);
     const canvas = $("cardCanvas");
     const ctx = canvas.getContext("2d");
-    const cards = [{ title:"", image:null, x:60, y:270, fontSize:72, color:"#ffffff", colorRanges:[], gradient:55, fallback:"#242033" }];
+    const cards = [{ title:"", image:null, x:60, y:270, fontSize:72, color:"#ffffff", colorRanges:[], colorPhrases:[], gradient:55, fallback:"#242033" }];
     let current = 0;
     let dragging = false;
     let dragOffset = {x:0,y:0};
@@ -112,7 +112,10 @@
     function saveInputs() {
       const c = card();
       const newTitle = $("translatedTitle").value;
-      if (newTitle !== c.title) c.colorRanges = [];
+      if (newTitle !== c.title) {
+        c.colorRanges = [];
+        c.colorPhrases = [];
+      }
       c.title = newTitle;
       c.fontSize = Number($("fontSize").value);
       c.color = $("textColor").value;
@@ -254,6 +257,7 @@
       $("status").textContent = "사진에서 큰 제목을 읽고 자연스럽게 다듬고 있어요…";
 
       try {
+        saveInputs();
         const imageDataUri = await new Promise((resolve, reject) => {
           const reader = new FileReader();
           reader.onload = () => resolve(reader.result);
@@ -263,14 +267,32 @@
         const response = await fetch(workerAddress, {
           method: "POST",
           headers: {"Content-Type":"application/json"},
-          body: JSON.stringify({imageDataUri, targetLanguage:$("targetLanguage").value})
+          body: JSON.stringify({
+            imageDataUri,
+            targetLanguage:$("targetLanguage").value,
+            previousTitle:card().title,
+            highlightPhrases:card().colorPhrases.map(({id,text}) => ({id,text}))
+          })
         });
         const result = await response.json();
         if (!response.ok) throw new Error(result.error || `요청 오류 (${response.status})`);
         if (!result.title) throw new Error("번역된 제목을 받지 못했습니다.");
         saveInputs();
-        card().title = result.title;
-        card().colorRanges = [];
+        const c = card();
+        c.title = result.title;
+        c.colorRanges = [];
+        const remappedPhrases = [];
+        for (const phrase of c.colorPhrases) {
+          const translatedPhrase = result.highlights?.find((item) => item.id === phrase.id)?.text?.trim() || "";
+          const start = translatedPhrase ? c.title.indexOf(translatedPhrase) : -1;
+          if (start >= 0) {
+            c.colorRanges.push({start, end:start + translatedPhrase.length, color:phrase.color});
+            remappedPhrases.push({...phrase, text:translatedPhrase});
+          } else {
+            remappedPhrases.push(phrase);
+          }
+        }
+        c.colorPhrases = remappedPhrases;
         loadCard();
         $("status").textContent = "번역이 끝났어요. 오른쪽에서 제목을 고치거나 일부 글자색을 바꿔보세요.";
       } catch (error) {
@@ -350,7 +372,11 @@
         return;
       }
       saveInputs();
-      card().colorRanges.push({start, end, color:$("selectionColor").value});
+      const selectedText = $("translatedTitle").value.slice(start, end);
+      const color = $("selectionColor").value;
+      const id = "phrase-" + Date.now() + "-" + Math.random().toString(36).slice(2,8);
+      card().colorRanges.push({start, end, color});
+      card().colorPhrases.push({id, text:selectedText, color});
       draw();
       $("status").textContent = "선택한 글자에만 색을 적용했어요.";
     });
@@ -360,7 +386,7 @@
     $("addCardButton").addEventListener("click", () => {
       saveInputs();
       const previous = card();
-      cards.push({title:"",image:null,x:60,y:270,fontSize:previous.fontSize,color:previous.color,colorRanges:[],gradient:previous.gradient,fallback:previous.fallback});
+      cards.push({title:"",image:null,x:60,y:270,fontSize:previous.fontSize,color:previous.color,colorRanges:[],colorPhrases:[],gradient:previous.gradient,fallback:previous.fallback});
       current = cards.length-1;
       $("backgroundImage").value = "";
       loadCard();
