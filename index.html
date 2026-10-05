@@ -3,6 +3,9 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=Do+Hyeon&family=Noto+Sans+KR:wght@800;900&display=swap" rel="stylesheet">
   <title>카드뉴스 메이커</title>
   <style>
     *{box-sizing:border-box}body{margin:0;padding:18px;color:#f4f4f5;background:#101116;font:15px Arial,sans-serif}h1{max-width:1200px;margin:0 auto 16px;font-size:22px}.layout{display:grid;grid-template-columns:minmax(270px,330px) minmax(300px,1fr) minmax(270px,330px);gap:16px;max-width:1200px;margin:auto;align-items:start}.panel,.preview{background:#181a22;border:1px solid #292c36;border-radius:12px;padding:16px}.field{margin-bottom:13px}label{display:block;margin:0 0 7px;color:#d5d6dc;font-size:13px;font-weight:bold}input,select,textarea,button{width:100%;padding:10px;color:#f4f4f5;background:#111319;border:1px solid #343743;border-radius:7px;font:inherit}textarea{resize:vertical;min-height:86px}input[type=file]{padding:9px}input[type=color]{height:42px;padding:5px}input[type=range]{padding:0;accent-color:#6941f5}button{border:0;background:#292c36;font-weight:bold;cursor:pointer}button.primary{background:#6941f5}button:disabled{opacity:.55;cursor:wait}.help,.status{margin-top:6px;color:#aeb4c3;font-size:12px;line-height:1.5}.status{color:#c7b8ff;white-space:pre-wrap}.card-frame{max-width:390px;margin:auto}.canvas-wrap{width:100%;aspect-ratio:4/5;background:#222032;border-radius:10px;overflow:hidden}.canvas-wrap canvas{width:100%;height:100%;display:block;touch-action:none}.nav,.action,.paste-row{display:grid;grid-template-columns:1fr 1fr;gap:8px}.nav{margin-top:10px}.nav button{padding:12px}.action{margin-top:10px}.action button:last-child{grid-column:1/-1}.paste-row{margin-top:6px}.paste-row button{padding:8px;color:#ddd;font-size:12px}.hint{margin-top:8px;color:#aeb4c3;font-size:12px;line-height:1.5}.slider-value{margin-left:4px;color:#aaa;font-weight:normal}.section-title{margin:2px 0 12px;font-weight:bold}.small-button{margin-top:7px;padding:9px;font-size:13px}@media(max-width:850px){.layout{grid-template-columns:1fr}.card-frame{max-width:min(100%,390px)}}
@@ -37,11 +40,7 @@
         <div class="paste-row"><button type="button" id="pasteBackgroundButton">캡처 붙여넣기 대상으로 선택</button><button type="button" id="clearBackgroundButton">선택 취소</button></div>
         <div class="help">이 사진만 카드 배경으로 사용됩니다. 번역 요청에는 보내지 않아요.</div>
       </div>
-      <div class="action">
-        <button id="addCardButton">카드 추가</button>
-        <button id="downloadButton" class="primary">현재 카드 PNG 다운로드</button>
-        <button id="shareButton" class="primary">카카오톡 공유하기</button>
-      </div>
+      <div class="action"><button id="addCardButton">카드 추가</button><button id="downloadButton" class="primary">현재 카드 PNG 다운로드</button><button id="shareButton" class="primary">카카오톡 공유하기</button></div>
     </section>
 
     <section class="preview">
@@ -60,7 +59,13 @@
       </div>
       <div class="field">
         <label>글자 모양</label>
-        <div class="help">굵고 선명한 뉴스형 고딕 글씨로 표시됩니다.</div>
+        <select id="fontStyle">
+          <option value="news">굵은 뉴스 고딕</option>
+          <option value="blackHan">블랙 한 산스 (굵고 꽉 찬 글씨)</option>
+          <option value="doHyeon">도현체 (압축형 제목 글씨)</option>
+          <option value="notoBlack">Noto Sans KR 블랙</option>
+        </select>
+        <div class="help">보내주신 예시처럼 굵고 선명한 제목 글씨를 고를 수 있어요.</div>
       </div>
       <div class="field">
         <label for="fontSize">글자 크기 <span id="fontSizeValue" class="slider-value"></span></label>
@@ -93,7 +98,13 @@
     const $ = (id) => document.getElementById(id);
     const canvas = $("cardCanvas");
     const ctx = canvas.getContext("2d");
-    const cards = [{ title:"", image:null, x:60, y:270, fontSize:72, color:"#ffffff", colorRanges:[], colorPhrases:[], gradient:55, fallback:"#242033" }];
+    const cards = [{ title:"", image:null, x:60, y:270, fontSize:72, fontStyle:"blackHan", color:"#ffffff", colorRanges:[], colorPhrases:[], gradient:55, fallback:"#242033" }];
+    const fontStyles = {
+      news: { weight: 800, family: 'Arial, "Malgun Gothic", "맑은 고딕", sans-serif' },
+      blackHan: { weight: 400, family: '"Black Han Sans", "Malgun Gothic", "맑은 고딕", sans-serif' },
+      doHyeon: { weight: 400, family: '"Do Hyeon", "Malgun Gothic", "맑은 고딕", sans-serif' },
+      notoBlack: { weight: 900, family: '"Noto Sans KR", "Malgun Gothic", "맑은 고딕", sans-serif' }
+    };
     let current = 0;
     let dragging = false;
     let dragOffset = {x:0,y:0};
@@ -117,6 +128,7 @@
         c.colorPhrases = [];
       }
       c.title = newTitle;
+      c.fontStyle = $("fontStyle").value;
       c.fontSize = Number($("fontSize").value);
       c.color = $("textColor").value;
       c.gradient = Number($("gradientStrength").value);
@@ -126,6 +138,7 @@
     function loadCard() {
       const c = card();
       $("translatedTitle").value = c.title;
+      $("fontStyle").value = c.fontStyle || "blackHan";
       $("fontSize").value = c.fontSize;
       $("fontSizeValue").textContent = `${c.fontSize}px`;
       $("textColor").value = c.color;
@@ -199,7 +212,8 @@
         ctx.fillRect(0, 0, canvas.width, canvas.height);
       }
 
-      ctx.font = `800 ${c.fontSize}px Arial, "Malgun Gothic", "맑은 고딕", sans-serif`;
+      const font = fontStyles[c.fontStyle] || fontStyles.blackHan;
+      ctx.font = `${font.weight} ${c.fontSize}px ${font.family}`;
       ctx.textBaseline = "middle";
       ctx.textAlign = "left";
       const lines = textLines(title, 900);
@@ -361,6 +375,12 @@
     $("translatedTitle").addEventListener("mouseup", rememberSelection);
     $("translatedTitle").addEventListener("input", () => { saveInputs(); draw(); rememberSelection(); });
     $("fontSize").addEventListener("input", () => { saveInputs(); $("fontSizeValue").textContent = `${$("fontSize").value}px`; draw(); });
+    $("fontStyle").addEventListener("change", async () => {
+      saveInputs();
+      const font = fontStyles[$("fontStyle").value] || fontStyles.blackHan;
+      try { await document.fonts.load(`${font.weight} 72px ${font.family}`, "카드뉴스 제목"); } catch {}
+      draw();
+    });
     $("textColor").addEventListener("input", () => { saveInputs(); draw(); });
     $("gradientStrength").addEventListener("input", () => { saveInputs(); $("gradientValue").textContent = `${$("gradientStrength").value}%`; draw(); });
     $("fallbackColor").addEventListener("input", () => { saveInputs(); draw(); });
@@ -386,7 +406,7 @@
     $("addCardButton").addEventListener("click", () => {
       saveInputs();
       const previous = card();
-      cards.push({title:"",image:null,x:60,y:270,fontSize:previous.fontSize,color:previous.color,colorRanges:[],colorPhrases:[],gradient:previous.gradient,fallback:previous.fallback});
+      cards.push({title:"",image:null,x:60,y:270,fontSize:previous.fontSize,fontStyle:previous.fontStyle,color:previous.color,colorRanges:[],colorPhrases:[],gradient:previous.gradient,fallback:previous.fallback});
       current = cards.length-1;
       $("backgroundImage").value = "";
       loadCard();
@@ -448,6 +468,9 @@
     canvas.addEventListener("pointercancel", () => { dragging = false; });
 
     loadCard();
+    document.fonts.load('400 72px "Black Han Sans"', "카드뉴스 제목")
+      .then(() => draw())
+      .catch(() => draw());
   </script>
 </body>
 </html>
