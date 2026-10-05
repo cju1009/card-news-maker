@@ -6,7 +6,7 @@
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/fonts-archive/Paperlogy/subsets/Paperlogy-dynamic-subset.css">
   <title>카드뉴스 메이커</title>
   <style>
-    *{box-sizing:border-box}body{margin:0;padding:18px;color:#f4f4f5;background:#101116;font:15px Arial,sans-serif}h1{max-width:1200px;margin:0 auto 16px;font-size:22px}.layout{display:grid;grid-template-columns:minmax(270px,330px) minmax(300px,1fr) minmax(270px,330px);gap:16px;max-width:1200px;margin:auto;align-items:start}.panel,.preview{min-width:0;background:#181a22;border:1px solid #292c36;border-radius:12px;padding:16px}.field{margin-bottom:13px}label{display:block;margin:0 0 7px;color:#d5d6dc;font-size:13px;font-weight:bold}input,select,textarea,button{width:100%;min-width:0;padding:10px;color:#f4f4f5;background:#111319;border:1px solid #343743;border-radius:7px;font:inherit}textarea{resize:vertical;min-height:86px}input[type=file]{padding:9px}input[type=color]{height:42px;padding:5px}input[type=range]{padding:0;accent-color:#6941f5}button{border:0;background:#292c36;font-weight:bold;cursor:pointer}button.primary{background:#6941f5}button:disabled{opacity:.55;cursor:wait}.help,.status{margin-top:6px;color:#aeb4c3;font-size:12px;line-height:1.5}.status{color:#c7b8ff;white-space:pre-wrap}.card-frame{max-width:390px;margin:auto}.canvas-wrap{width:100%;aspect-ratio:4/5;background:#222032;border-radius:10px;overflow:hidden}.canvas-wrap canvas{width:100%;height:100%;display:block;touch-action:none}.nav,.action,.paste-row{display:grid;grid-template-columns:1fr 1fr;gap:8px}.nav{margin-top:10px}.nav button{padding:12px}.action{margin-top:10px}.action button:last-child{grid-column:1/-1}.paste-row{margin-top:6px}.paste-row button{padding:8px;color:#ddd;font-size:12px}.hint{margin-top:8px;color:#aeb4c3;font-size:12px;line-height:1.5}.slider-value{margin-left:4px;color:#aaa;font-weight:normal}.section-title{margin:2px 0 12px;font-weight:bold}.small-button{margin-top:7px;padding:9px;font-size:13px}@media(max-width:850px){body{padding:12px}.layout{grid-template-columns:minmax(0,1fr);gap:12px}.card-frame{width:100%;max-width:min(100%,430px)}.panel,.preview{padding:14px}}@media(max-width:480px){body{padding:10px;font-size:14px;padding-bottom:calc(10px + env(safe-area-inset-bottom))}h1{font-size:20px;margin-bottom:12px}.layout{gap:10px}.panel,.preview{padding:12px;border-radius:10px}.field{margin-bottom:12px}input,select,textarea,button{font-size:16px}input[type=file]{font-size:14px;padding:8px}.paste-row,.nav,.action{gap:7px}.paste-row button{min-height:46px;padding:7px 5px;font-size:12px;line-height:1.35}.nav button,.action button{min-height:46px}.canvas-wrap{border-radius:8px}.hint,.help,.status{font-size:12px}.section-title{font-size:15px}}
+    *{box-sizing:border-box}body{margin:0;padding:18px;color:#f4f4f5;background:#101116;font:15px Arial,sans-serif}h1{max-width:1200px;margin:0 auto 16px;font-size:22px}.layout{display:grid;grid-template-columns:minmax(270px,330px) minmax(300px,1fr) minmax(270px,330px);gap:16px;max-width:1200px;margin:auto;align-items:start}.panel,.preview{background:#181a22;border:1px solid #292c36;border-radius:12px;padding:16px}.field{margin-bottom:13px}label{display:block;margin:0 0 7px;color:#d5d6dc;font-size:13px;font-weight:bold}input,select,textarea,button{width:100%;padding:10px;color:#f4f4f5;background:#111319;border:1px solid #343743;border-radius:7px;font:inherit}textarea{resize:vertical;min-height:86px}input[type=file]{padding:9px}input[type=color]{height:42px;padding:5px}input[type=range]{padding:0;accent-color:#6941f5}button{border:0;background:#292c36;font-weight:bold;cursor:pointer}button.primary{background:#6941f5}button:disabled{opacity:.55;cursor:wait}.help,.status{margin-top:6px;color:#aeb4c3;font-size:12px;line-height:1.5}.status{color:#c7b8ff;white-space:pre-wrap}.card-frame{max-width:390px;margin:auto}.canvas-wrap{width:100%;aspect-ratio:4/5;background:#222032;border-radius:10px;overflow:hidden}.canvas-wrap canvas{width:100%;height:100%;display:block;touch-action:none}.nav,.action,.paste-row{display:grid;grid-template-columns:1fr 1fr;gap:8px}.nav{margin-top:10px}.nav button{padding:12px}.action{margin-top:10px}.action button:last-child{grid-column:1/-1}.paste-row{margin-top:6px}.paste-row button{padding:8px;color:#ddd;font-size:12px}.hint{margin-top:8px;color:#aeb4c3;font-size:12px;line-height:1.5}.slider-value{margin-left:4px;color:#aaa;font-weight:normal}.section-title{margin:2px 0 12px;font-weight:bold}.small-button{margin-top:7px;padding:9px;font-size:13px}@media(max-width:850px){.layout{grid-template-columns:1fr}.card-frame{max-width:min(100%,390px)}}
   </style>
 </head>
 <body>
@@ -15,15 +15,14 @@
     <section class="panel">
       <div class="field">
         <label for="workerUrl">AI 연결 주소</label>
-        <input id="workerUrl" type="url" placeholder="https://내-worker.workers.dev/?access=암호">
-        <button type="button" id="saveWorkerUrlButton" class="small-button">연결 주소 저장</button>
-        <div id="workerUrlStatus" class="help">주소 전체를 입력하면 이 브라우저에 자동 저장됩니다. 컴퓨터와 휴대폰에는 각각 한 번 입력해야 해요.</div>
+        <input id="workerUrl" type="url" placeholder="Cloudflare Worker 주소를 입력하세요">
+        <div class="help">접속 암호가 포함된 주소예요. 이 주소를 다른 사람과 공유하지 마세요.</div>
       </div>
       <div class="field">
         <label for="sourceImage">① 번역할 문구가 있는 사진</label>
         <input id="sourceImage" type="file" accept="image/*">
         <div class="paste-row"><button type="button" id="pasteSourceButton">캡처 붙여넣기 대상으로 선택</button><button type="button" id="clearSourceButton">선택 취소</button></div>
-        <div class="help">큰 제목만 읽어 자연스럽게 번역합니다. 이 사진은 카드에 들어가지 않아요. 컴퓨터는 대상 버튼을 누른 뒤 Ctrl+V, 휴대폰은 파일 선택으로 올려주세요.</div>
+        <div class="help">큰 제목만 읽어 자연스럽게 번역합니다. 이 사진은 카드에 들어가지 않아요.</div>
       </div>
       <div class="field">
         <label for="targetLanguage">번역할 언어</label>
@@ -129,23 +128,8 @@
     let savedSelection = {start:0,end:0};
     const card = () => cards[current];
 
-    const WORKER_URL_KEY = "cardNewsWorkerUrl";
-    try { $("workerUrl").value = localStorage.getItem(WORKER_URL_KEY) || ""; } catch {}
-    function saveWorkerUrl(showMessage = false) {
-      const value = $("workerUrl").value.trim();
-      try {
-        if (value) localStorage.setItem(WORKER_URL_KEY, value);
-        else localStorage.removeItem(WORKER_URL_KEY);
-        if (showMessage) $("workerUrlStatus").textContent = value
-          ? "연결 주소를 이 브라우저에 저장했어요. 이 기기에서는 다음에도 입력란에 표시됩니다."
-          : "주소를 입력한 뒤 저장 버튼을 눌러주세요.";
-      } catch {
-        if (showMessage) $("workerUrlStatus").textContent = "브라우저 저장이 막혀 있어요. 일반 브라우저 창에서 다시 시도해주세요.";
-      }
-    }
-    $("workerUrl").addEventListener("input", () => saveWorkerUrl());
-    $("workerUrl").addEventListener("change", () => saveWorkerUrl());
-    $("saveWorkerUrlButton").addEventListener("click", () => saveWorkerUrl(true));
+    $("workerUrl").value = localStorage.getItem("cardNewsWorkerUrl") || "";
+    $("workerUrl").addEventListener("input", () => localStorage.setItem("cardNewsWorkerUrl", $("workerUrl").value));
 
     function syncWatermarkToLanguage() {
       const isJapanese = $("targetLanguage").value === "일본어";
@@ -324,15 +308,7 @@
       const workerAddress = $("workerUrl").value.trim();
       const requestedLanguage = $("targetLanguage").value;
       if (!file) { $("status").textContent = "번역할 사진을 선택하거나 캡처를 붙여넣으세요."; return; }
-      if (!workerAddress) { $("status").textContent = "Cloudflare Worker 주소를 입력하세요."; return; }
-      let workerUrl;
-      try { workerUrl = new URL(workerAddress); }
-      catch { $("status").textContent = "Worker 주소 형식이 올바르지 않아요. https:// 주소를 확인해주세요."; return; }
-      if (!workerUrl.searchParams.get("access")) {
-        $("status").textContent = "연결 주소 끝에 ?access=Cloudflare에서 설정한 앱 접속 암호를 붙여주세요.";
-        return;
-      }
-      saveWorkerUrl();
+      if (!workerAddress) { $("status").textContent = "Cloudflare Worker 연결 주소를 입력하세요."; return; }
 
       const button = $("translateButton");
       button.disabled = true;
@@ -346,7 +322,7 @@
           reader.onerror = () => reject(new Error("사진을 읽지 못했습니다."));
           reader.readAsDataURL(file);
         });
-        const response = await fetch(workerUrl.toString(), {
+        const response = await fetch(workerAddress, {
           method: "POST",
           headers: {"Content-Type":"application/json"},
           body: JSON.stringify({
@@ -413,7 +389,7 @@
       $("status").textContent = "배경 사진을 지웠어요.";
     });
 
-    window.addEventListener("paste", async (event) => {
+    document.addEventListener("paste", async (event) => {
       const items = event.clipboardData?.items;
       if (!items) return;
       for (const item of items) {
